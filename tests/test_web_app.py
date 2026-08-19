@@ -854,15 +854,27 @@ class WebAppTests(
             pid=12345,
         )
 
-        try:
-            web_app._refresh_process = process
-            await web_app._stop_refresh_process()
-        finally:
-            web_app._refresh_process = original_process
+        with patch.object(
+            web_app.os,
+            "killpg",
+            create=True,
+        ) as killpg:
+            try:
+                web_app._refresh_process = process
+                await web_app._stop_refresh_process()
+            finally:
+                web_app._refresh_process = original_process
 
         if os.name == "nt":
             process.send_signal.assert_called_once_with(
                 signal.CTRL_BREAK_EVENT
+            )
+            killpg.assert_not_called()
+        else:
+            process.send_signal.assert_not_called()
+            killpg.assert_called_once_with(
+                process.pid,
+                signal.SIGTERM,
             )
         process.wait.assert_awaited_once()
 
