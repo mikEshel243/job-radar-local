@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: pip
+      - name: Install application and optional Gmail dependencies
+        run: python -m pip install -r requirements-gmail.txt
+      - name: Verify dependency integrity
+        run: python -m pip check
+      - name: Compile Python sources
+        run: python -m compileall -q src scripts tests
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate synthetic demo database
+        run: python scripts/seed_demo_data.py --database "${RUNNER_TEMP}/job-radar-demo.db"
+      - name: Check whitespace
+        run: git diff --check
+
+  windows-companion:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build notification companion
+        shell: powershell
+        run: tools\WhatsAppNotificationListener\build.ps1 -Configuration Release
+      - name: Run synthetic companion self-test
+        shell: powershell
+        run: tools\WhatsAppNotificationListener\bin\Release\WhatsAppNotificationListener.exe --self-test

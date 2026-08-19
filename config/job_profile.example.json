@@ -1,0 +1,137 @@
+{
+  "schema_version": 2,
+  "scoring_model": "weighted_preferences_v2",
+  "profile_name": "Fictional portfolio profile",
+  "criteria": {
+    "role_domain": {
+      "weight": 5,
+      "required_for_high_match": true,
+      "positive_title_keywords": {
+        "platform developer": 45,
+        "data engineer": 38,
+        "quality automation engineer": 32
+      },
+      "neutral_title_keywords": {
+        "software developer": 8
+      },
+      "negative_title_keywords": {
+        "sales representative": -40
+      },
+      "score_cap": 45,
+      "unknown_fit": -0.5
+    },
+    "location": {
+      "weight": 4,
+      "required_for_high_match": false,
+      "preferred_keywords": [
+        "Example City",
+        "Sample Harbor"
+      ],
+      "acceptable_keywords": [
+        "Remote",
+        "Demo Metro"
+      ],
+      "neutral_keywords": [
+        "Fictional Capital"
+      ],
+      "excluded_keywords": [
+        "Outside Region"
+      ],
+      "unclassified_keywords": [],
+      "fit_values": {
+        "preferred": 1.0,
+        "acceptable": 0.35,
+        "neutral": 0.0,
+        "excluded": -1.0,
+        "unknown": -0.3
+      },
+      "excluded_policy": "reject",
+      "unknown_fit": -0.3
+    },
+    "technology": {
+      "weight": 3,
+      "required_for_high_match": false,
+      "positive_technology_keywords": {
+        "Python": 18,
+        "FastAPI": 15,
+        "PostgreSQL": 12,
+        "Git": 4
+      },
+      "neutral_technology_keywords": {
+        "SQLite": 3
+      },
+      "negative_technology_keywords": {
+        "LegacyDB": -5
+      },
+      "score_cap": 45,
+      "unknown_fit": -0.15
+    },
+    "experience": {
+      "weight": 4,
+      "required_for_high_match": false,
+      "preferred_maximum": 2,
+      "acceptable_maximum": 4,
+      "excluded_minimum": 7,
+      "excluded_policy": "penalty",
+      "minimum_analysis_confidence": 0.6,
+      "unknown_fit": -0.2
+    },
+    "seniority": {
+      "weight": 3,
+      "required_for_high_match": false,
+      "junior_keywords": [
+        "entry level",
+        "associate",
+        "junior"
+      ],
+      "student_keywords": [
+        "student",
+        "intern"
+      ],
+      "excluded_title_keywords": [
+        "director",
+        "vice president"
+      ],
+      "allow_student_roles": false,
+      "excluded_policy": "penalty",
+      "unknown_fit": -0.15
+    },
+    "education": {
+      "weight": 1,
+      "required_for_high_match": false,
+      "active_student_policy": "penalty",
+      "unknown_fit": 0.0
+    },
+    "work_model": {
+      "weight": 2,
+      "required_for_high_match": false,
+      "preferred_keywords": [
+        "remote"
+      ],
+      "acceptable_keywords": [
+        "hybrid"
+      ],
+      "excluded_keywords": [
+        "on-site only"
+      ],
+      "preferred_fit": 1.0,
+      "acceptable_fit": 0.3,
+      "excluded_fit": -1.0,
+      "excluded_policy": "penalty",
+      "unknown_fit": 0.0
+    }
+  },
+  "thresholds": {
+    "high_match": 72,
+    "review": 48
+  },
+  "interactions": [
+    {
+      "criteria": [
+        "role_domain",
+        "technology"
+      ],
+      "bonus": 4
+    }
+  ]
+}

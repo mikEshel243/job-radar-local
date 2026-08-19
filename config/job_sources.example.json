@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "location_policy": {
+    "country_codes": [
+      "EX"
+    ],
+    "terms": [
+      "Example City",
+      "Sample Harbor",
+      "Remote"
+    ]
+  },
+  "sources": [
+    {
+      "id": "example-greenhouse",
+      "company": "Example Greenhouse Company",
+      "adapter": "greenhouse",
+      "identifier": "example-company",
+      "enabled": false
+    },
+    {
+      "id": "example-lever",
+      "company": "Sample Lever Company",
+      "adapter": "lever",
+      "identifier": "sample-company",
+      "region": "global",
+      "enabled": false
+    },
+    {
+      "id": "example-ashby",
+      "company": "Demo Ashby Company",
+      "adapter": "ashby",
+      "identifier": "demo-company",
+      "enabled": false
+    },
+    {
+      "id": "example-smartrecruiters",
+      "company": "Fictional Recruiting Company",
+      "adapter": "smartrecruiters",
+      "identifier": "fictional-company",
+      "enabled": false
+    },
+    {
+      "id": "example-workable",
+      "company": "Placeholder Workable Company",
+      "adapter": "workable",
+      "identifier": "placeholder-company",
+      "enabled": false
+    }
+  ]
+}

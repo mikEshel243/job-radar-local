@@ -1,0 +1,31 @@
+7/23/26, 17:19 - Messages and calls are end-to-end encrypted. Only people in this chat can read them.
+7/23/26, 17:22 - Example Sender joined using a group link.
+7/23/26, 19:11 - Example Sender: *Junior Backend Developer*
+📈 Level: Junior
+
+
+https://jobs.example.com/postings/101?utm_source=fixture&utm_content=native
+
+Build local services and APIs.
+Posted today
+
+Community information:
+https://jobs.example.com/community?utm_source=fixture
+7/23/26, 19:12 - Example Sender: New entry-level development role!
+
+Junior Full-Stack Developer
+
+
+Full details and application link:
+
+
+https://jobs.example.com/postings/102
+7/23/26, 19:13 - Example Sender: Synthetic non-job announcement.
+7/23/26, 19:14 - Example Sender: *Software Engineer*
+📈 Level: Junior
+
+https://jobs.example.com/postings/103?utm_source=fixture
+7/23/26, 19:14 - Example Sender: *Software Engineer*
+📈 Level: Junior
+
+https://jobs.example.com/postings/103?utm_source=fixture

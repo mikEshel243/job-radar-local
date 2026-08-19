@@ -1,0 +1,117 @@
+{
+  "name": "Example Telegram Job Digest",
+  "type": "public_channel",
+  "id": 1234567890,
+  "messages": [
+    {
+      "id": 1,
+      "type": "service",
+      "date": "2025-01-22T09:00:00",
+      "date_unixtime": "1737536400",
+      "actor": "Example Telegram Job Digest",
+      "actor_id": "channel1234567890",
+      "action": "create_channel",
+      "title": "Example Telegram Job Digest",
+      "text": "",
+      "text_entities": []
+    },
+    {
+      "id": 2,
+      "type": "message",
+      "date": "2025-01-22T10:00:00",
+      "date_unixtime": "1737540000",
+      "from": "Example Telegram Job Digest",
+      "from_id": "channel1234567890",
+      "text": [
+        {
+          "type": "bold",
+          "text": "Backend Developer"
+        },
+        " @ Example\nPosted on: 22-01-2025\nLocation: Example City\nClick ",
+        {
+          "type": "text_link",
+          "text": "here",
+          "href": "https://jobs.example.com/101?utm_source=fixture"
+        },
+        " to apply now!"
+      ],
+      "text_entities": [
+        {
+          "type": "bold",
+          "text": "Backend Developer"
+        },
+        {
+          "type": "plain",
+          "text": " @ Example\nPosted on: 22-01-2025\nLocation: Example City\nClick "
+        },
+        {
+          "type": "text_link",
+          "text": "here",
+          "href": "https://jobs.example.com/101?utm_source=fixture"
+        },
+        {
+          "type": "plain",
+          "text": " to apply now!"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "message",
+      "date": "2025-01-22T10:01:00",
+      "date_unixtime": "1737540060",
+      "from": "Example Telegram Job Digest",
+      "from_id": "channel1234567890",
+      "text": "Channel announcement without a job structure.",
+      "text_entities": [
+        {
+          "type": "plain",
+          "text": "Channel announcement without a job structure."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "message",
+      "date": "2025-01-22T10:02:00",
+      "date_unixtime": "1737540120",
+      "from": "Example Telegram Job Digest",
+      "from_id": "channel1234567890",
+      "text": [
+        {
+          "type": "bold",
+          "text": "Full-Stack Developer"
+        },
+        " @ Sample Company\nPosted on: 22-01-2025\nLocation: Example Heights\nApply: ",
+        {
+          "type": "url",
+          "text": "https://jobs.example.com/102?ref=telegram"
+        }
+      ],
+      "text_entities": [
+        {
+          "type": "bold",
+          "text": "Full-Stack Developer"
+        },
+        {
+          "type": "plain",
+          "text": " @ Sample Company\nPosted on: 22-01-2025\nLocation: Example Heights\nApply: "
+        },
+        {
+          "type": "url",
+          "text": "https://jobs.example.com/102?ref=telegram"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "message",
+      "date": "2025-01-22T10:03:00",
+      "date_unixtime": "1737540180",
+      "from": "Example Telegram Job Digest",
+      "from_id": "channel1234567890",
+      "text": "",
+      "text_entities": []
+    }
+  ]
+}

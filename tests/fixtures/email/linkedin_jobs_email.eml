@@ -1,0 +1,50 @@
+From: LinkedIn Jobs <jobs-noreply@linkedin.com>
+To: local-user@example.invalid
+Subject: New jobs selected for you
+Date: Sat, 01 Aug 2026 08:30:00 +0300
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+
+<!doctype html>
+<html>
+<body>
+  <table role="presentation">
+    <tbody>
+      <tr>
+        <td>
+          <a
+            class="text-md leading-regular text-color-brand"
+            href="https://www.linkedin.com/comm/jobs/view/123456789/?trackingId=discard-me&amp;trkEmail=discard-me"
+          >Backend Developer</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p class="text-system-gray-100 text-sm leading-[20px]">
+            Example Systems &middot; Example City, Exampleland (Hybrid)
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table role="presentation">
+    <tbody>
+      <tr>
+        <td>
+          <a
+            class="text-md leading-regular text-color-brand"
+            href="https://www.linkedin.com/comm/jobs/view/987654321/?midToken=discard-me"
+          >Embedded Engineer</a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p class="text-system-gray-100 text-sm leading-[20px]">
+            Sample Devices &middot; Example Heights, Exampleland (On-site)
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

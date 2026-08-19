@@ -1,0 +1,45 @@
+From: Amazon Jobs <noreply@mail.amazon.jobs>
+To: candidate@example.com
+Subject: Recommended Amazon jobs for candidate
+Date: Sat, 01 Aug 2026 08:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="amazon-boundary"
+
+--amazon-boundary
+Content-Type: text/plain; charset="utf-8"
+
+Two synthetic Amazon recommendations.
+
+--amazon-boundary
+Content-Type: text/html; charset="utf-8"
+
+<html>
+  <body>
+    <table>
+      <tr><td>
+        <a href="https://example.r.us-west-2.awstrack.me/L0/https:%2F%2Fwww.amazon.jobs%2Fjobs%2F12345001/1/token">
+          Software Development Engineer, Systems
+        </a>
+        <div>Example City, EXL</div>
+        <div>Basic Qualifications</div>
+        <div>3+ years of professional Java and Linux experience.</div>
+      </td></tr>
+    </table>
+    <table>
+      <tr><td>
+        <a href="https://example.r.us-west-2.awstrack.me/L0/https:%2F%2Fwww.amazon.jobs%2Fjobs%2F12345002/1/token">
+          Backend Developer
+        </a>
+        <div>Demo Metro, EXL</div>
+        <div>Example Devices Division</div>
+        <div>Basic Qualifications</div>
+        <div>Experience with Python, Docker, and distributed systems.</div>
+      </td></tr>
+    </table>
+    <a href="https://example.r.us-west-2.awstrack.me/L0/https:%2F%2Fjobs.amazon.co.uk%2Fuser%2Frecommendations/1/token">
+      View all recommendations
+    </a>
+  </body>
+</html>
+
+--amazon-boundary--

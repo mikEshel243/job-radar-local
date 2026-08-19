@@ -1,0 +1,4608 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Job Radar</title>
+
+    <style>
+        :root {
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            color-scheme: light;
+
+            --background: #f4f6f8;
+            --card: #ffffff;
+            --text: #18212f;
+            --muted: #657184;
+            --border: #d9dee7;
+            --primary: #2459d3;
+            --high: #087c45;
+            --review: #a86400;
+            --rejected: #a72727;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        a {
+            color: var(--primary);
+        }
+
+        .page {
+            width: min(1400px, 96%);
+            margin: 0 auto;
+            padding: 24px 0 60px;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
+
+        .personal-settings-button {
+            min-height: 42px;
+            padding: 9px 14px;
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            background: white;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .personal-settings-button:hover,
+        .personal-settings-button:focus-visible {
+            background: #e9efff;
+        }
+
+        .preferences-dialog {
+            width: min(720px, 94vw);
+            max-height: 88vh;
+            padding: 0;
+            overflow: hidden;
+            border: 0;
+            border-radius: 14px;
+            color: var(--text);
+            box-shadow: 0 18px 60px rgb(24 33 47 / 25%);
+        }
+
+        .preferences-dialog::backdrop {
+            background: rgb(24 33 47 / 52%);
+        }
+
+        .preferences-panel {
+            display: flex;
+            flex-direction: column;
+            max-height: 88vh;
+        }
+
+        .preferences-header {
+            padding: 20px 22px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .preferences-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .preferences-header p {
+            margin: 8px 0 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .preferences-list {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+            padding: 16px 22px;
+            overflow-y: auto;
+        }
+
+        .preference-row {
+            flex: 0 0 auto;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            overflow: hidden;
+        }
+
+        .preference-primary-row {
+            display: grid;
+            grid-template-columns:
+                minmax(180px, 1.4fr)
+                minmax(180px, 1fr)
+                minmax(160px, auto);
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+        }
+
+        .preference-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            text-align: right;
+        }
+
+        .preference-toggle::before {
+            content: "▾";
+            flex: 0 0 auto;
+            color: var(--primary);
+            font-size: 18px;
+            transition: transform 0.15s ease;
+        }
+
+        .preference-row.expanded .preference-primary-row {
+            background: #f8faff;
+        }
+
+        .preference-row.expanded .preference-toggle::before {
+            transform: rotate(180deg);
+        }
+
+        .preference-name {
+            font-weight: 700;
+        }
+
+        .preference-body {
+            display: grid;
+            gap: 16px;
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .preference-body[hidden] {
+            display: none;
+        }
+
+        .preference-description {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .preference-selection-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .preference-selection-group h3 {
+            margin: 0 0 7px;
+            font-size: 14px;
+        }
+
+        .preference-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .preference-chip {
+            padding: 5px 9px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--background);
+            font-size: 13px;
+            direction: auto;
+        }
+
+        .preference-empty-selection,
+        .preference-catalog-note {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .preference-board {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .preference-drop-zone {
+            min-width: 0;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--background);
+            transition:
+                border-color 0.15s ease,
+                background 0.15s ease;
+        }
+
+        .preference-drop-zone.drag-over {
+            border-color: var(--primary);
+            background: #e9efff;
+        }
+
+        .preference-drop-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 0 0 8px;
+            font-size: 14px;
+        }
+
+        .preference-drop-count {
+            min-width: 24px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: white;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .preference-drop-items {
+            display: flex;
+            align-content: flex-start;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 72px;
+            max-height: 240px;
+            padding: 2px;
+            overflow-y: auto;
+        }
+
+        .preference-drop-items:empty::before {
+            content: "גרור פריטים לכאן";
+            align-self: center;
+            width: 100%;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .preference-drag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            max-width: 100%;
+            padding: 6px 9px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: white;
+            cursor: grab;
+            direction: auto;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+            user-select: none;
+        }
+
+        .preference-drag-chip:active {
+            cursor: grabbing;
+        }
+
+        .preference-drag-chip.dragging {
+            opacity: 0.45;
+        }
+
+        .preference-drag-chip:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .preference-drag-handle {
+            color: var(--muted);
+            direction: ltr;
+        }
+
+        .preference-edit-note {
+            margin: 0;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #eef3ff;
+            color: var(--primary);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .preference-field-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+        }
+
+        .preference-field {
+            display: grid;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .preference-field input,
+        .preference-field select {
+            width: 100%;
+            min-height: 38px;
+            padding: 7px 9px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            color: var(--text);
+        }
+
+        .preference-inline-setting {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .preference-weight {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preference-weight input {
+            width: 100%;
+        }
+
+        .preference-weight output {
+            min-width: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .preference-required {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .preferences-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 14px 22px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .preferences-actions button {
+            min-height: 40px;
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .preferences-actions .primary {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .preferences-actions button:disabled {
+            cursor: wait;
+            opacity: 0.65;
+        }
+
+        .preferences-save-status {
+            flex: 1;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .preferences-save-status.error {
+            color: var(--rejected);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .stat {
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--card);
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .collection-status {
+            margin-bottom: 18px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--card);
+        }
+
+        .collection-status summary {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .amazon-import {
+            margin-bottom: 18px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--card);
+        }
+
+        .amazon-import summary {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .amazon-import-content {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .amazon-import-content p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .amazon-import-content textarea {
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        .amazon-import-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .amazon-import-actions a,
+        .amazon-import-actions button {
+            min-height: 40px;
+            padding: 8px 12px;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .amazon-import-actions a {
+            display: inline-flex;
+            align-items: center;
+            background: white;
+            color: var(--primary);
+        }
+
+        .amazon-import-actions button {
+            cursor: pointer;
+            background: var(--primary);
+            color: white;
+        }
+
+        .amazon-import-actions button:disabled {
+            cursor: wait;
+            opacity: 0.65;
+        }
+
+        .amazon-import-status {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .amazon-import-status.error {
+            color: var(--rejected);
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(250px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .collection-source {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .collection-source strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .collection-source.error {
+            padding: 10px;
+            text-align: start;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns:
+                minmax(280px, 2fr)
+                repeat(5, minmax(140px, 1fr))
+                auto;
+
+            gap: 10px;
+            padding: 14px;
+            margin-bottom: 18px;
+
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--card);
+        }
+
+        .search-filter {
+            min-width: 0;
+        }
+
+        .search-control {
+            display: flex;
+            gap: 6px;
+            height: 100%;
+        }
+
+        .search-control input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .filters .clear-search {
+            min-height: 42px;
+            padding-inline: 12px;
+            background: white;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .filters .clear-search[hidden] {
+            display: none;
+        }
+
+        .source-filter {
+            position: relative;
+            min-width: 0;
+            margin-top: 0;
+        }
+
+        .source-filter > summary {
+            display: flex;
+            align-items: center;
+            min-height: 42px;
+            padding: 8px 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            list-style-position: inside;
+            white-space: nowrap;
+        }
+
+        .source-filter > summary span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .source-filter[open] > summary {
+            border-color: var(--primary);
+        }
+
+        .source-filter-menu {
+            position: absolute;
+            z-index: 10;
+            top: calc(100% + 4px);
+            right: 0;
+            width: max(100%, 220px);
+            max-height: 320px;
+            padding: 8px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 8px 24px rgb(24 33 47 / 14%);
+        }
+
+        .source-filter-options {
+            display: grid;
+            gap: 2px;
+            margin-top: 6px;
+        }
+
+        .source-filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 36px;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .source-filter-option:hover {
+            background: #f4f6f8;
+        }
+
+        .filters .source-filter-option input {
+            width: auto;
+            min-height: auto;
+            margin: 0;
+            padding: 0;
+        }
+
+        .filters .source-filter-clear {
+            width: 100%;
+            min-height: 36px;
+            padding: 6px 8px;
+            background: white;
+            color: var(--primary);
+            border-color: var(--primary);
+            font-weight: 700;
+        }
+
+        .filters input,
+        .filters select,
+        .filters button {
+            min-height: 42px;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .filters button {
+            cursor: pointer;
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            font-weight: bold;
+        }
+
+        .filters button:disabled {
+            cursor: wait;
+            opacity: 0.65;
+        }
+
+        .filters button.cancel-action {
+            background: var(--rejected);
+            border-color: var(--rejected);
+        }
+
+        .automation-status-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                2,
+                minmax(0, 1fr)
+            );
+            gap: 12px;
+            margin: -8px 0 18px;
+        }
+
+        .automation-status-card {
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--card);
+        }
+
+        .automation-status-card > strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .refresh-status {
+            min-height: 22px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .refresh-status.error {
+            color: var(--rejected);
+        }
+
+        .refresh-progress {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .refresh-progress[hidden] {
+            display: none;
+        }
+
+        .refresh-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .refresh-progress progress {
+            width: min(520px, 70vw);
+            height: 14px;
+            accent-color: var(--primary);
+        }
+
+        .refresh-progress-count {
+            min-width: 130px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .results-count {
+            color: var(--muted);
+        }
+
+        .jobs {
+            display: grid;
+            gap: 14px;
+        }
+
+        .job-card {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--card);
+        }
+
+        .job-card.interested {
+            border-right: 5px solid #2459d3;
+        }
+
+        .job-card.applied {
+            border-right: 5px solid #087c45;
+        }
+
+        .job-card.not_interested {
+            opacity: 0.72;
+        }
+
+        .job-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .job-title {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .company {
+            margin-top: 6px;
+            color: var(--muted);
+            font-weight: bold;
+        }
+
+        .score {
+            min-width: 78px;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .score.high_match {
+            color: var(--high);
+            background: #e7f7ef;
+        }
+
+        .score.review {
+            color: var(--review);
+            background: #fff2d8;
+        }
+
+        .score.rejected {
+            color: var(--rejected);
+            background: #fde9e9;
+        }
+
+        .metadata {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .tag {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #eef1f5;
+            font-size: 13px;
+        }
+
+        .technologies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .technology {
+            padding: 4px 8px;
+            border: 1px solid #ccd5e2;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+        .reasons {
+            margin: 14px 0 0;
+            padding-right: 20px;
+            color: #39465a;
+        }
+
+        .reasons li {
+            margin-bottom: 5px;
+        }
+
+        details {
+            margin-top: 14px;
+        }
+
+        .description {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f7f8fa;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            color: #38445a;
+            text-align: left;
+            unicode-bidi: plaintext;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .actions a,
+        .actions button {
+            min-height: 38px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .actions a.primary {
+            color: white;
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .actions button.active {
+            font-weight: bold;
+            border-color: var(--primary);
+            background: #e9efff;
+        }
+
+        .empty,
+        .loading,
+        .error {
+            padding: 30px;
+            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--card);
+        }
+
+        .error {
+            color: var(--rejected);
+        }
+
+        @media (max-width: 1000px) {
+            .filters {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .header-top {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .personal-settings-button {
+                align-self: flex-start;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .automation-status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .job-top {
+                flex-direction: column;
+            }
+
+            .score {
+                min-width: auto;
+            }
+
+            .preference-primary-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .preferences-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <header class="header">
+            <div class="header-top">
+                <div>
+                    <h1>Job Radar</h1>
+
+                    <p>
+                        משרות שנאספו ונותחו מקומית במחשב
+                    </p>
+                </div>
+
+                <button
+                    id="preferencesButton"
+                    class="personal-settings-button"
+                    type="button"
+                    aria-haspopup="dialog"
+                >
+                    ⚙ אזור אישי · העדפות
+                </button>
+            </div>
+        </header>
+
+        <dialog
+            id="preferencesDialog"
+            class="preferences-dialog"
+            aria-labelledby="preferencesHeading"
+        >
+            <form
+                id="preferencesForm"
+                class="preferences-panel"
+            >
+                <div class="preferences-header">
+                    <h2 id="preferencesHeading">
+                        הגדרות העדפות
+                    </h2>
+
+                    <p>
+                        משקל 1 הוא נמוך ומשקל 5 הוא גבוה.
+                        העדפה הכרחית חייבת לקבל התאמה חיובית
+                        כדי שמשרה תוכל לקבל התאמה גבוהה.
+                    </p>
+                </div>
+
+                <div
+                    id="preferencesList"
+                    class="preferences-list"
+                ></div>
+
+                <div class="preferences-actions">
+                    <span
+                        id="preferencesSaveStatus"
+                        class="preferences-save-status"
+                        role="status"
+                        aria-live="polite"
+                    ></span>
+
+                    <button
+                        id="closePreferencesButton"
+                        type="button"
+                    >
+                        סגירה
+                    </button>
+
+                    <button
+                        id="savePreferencesButton"
+                        class="primary"
+                        type="submit"
+                    >
+                        שמירת העדפות
+                    </button>
+                </div>
+            </form>
+        </dialog>
+
+        <section class="stats">
+            <div class="stat">
+                <span
+                    class="stat-value"
+                    id="highMatchCount"
+                >0</span>
+
+                <span class="stat-label">
+                    התאמה גבוהה
+                </span>
+            </div>
+
+            <div class="stat">
+                <span
+                    class="stat-value"
+                    id="reviewCount"
+                >0</span>
+
+                <span class="stat-label">
+                    לבדיקה
+                </span>
+            </div>
+
+            <div class="stat">
+                <span
+                    class="stat-value"
+                    id="interestedCount"
+                >0</span>
+
+                <span class="stat-label">
+                    מעניינות
+                </span>
+            </div>
+
+            <div class="stat">
+                <span
+                    class="stat-value"
+                    id="appliedCount"
+                >0</span>
+
+                <span class="stat-label">
+                    נשלחו
+                </span>
+            </div>
+        </section>
+
+        <details class="collection-status">
+            <summary>
+                מצב איסוף ממקורות מעסיקים ו-ATS
+            </summary>
+
+            <div
+                id="collectionStatus"
+                class="collection-grid"
+            ></div>
+        </details>
+
+        <details class="amazon-import">
+            <summary>המלצות Amazon האישיות</summary>
+
+            <div class="amazon-import-content">
+                <p>
+                    פתחו את כל ההמלצות בחשבון Amazon Jobs,
+                    טענו את כולן, העתיקו את הדף והדביקו כאן.
+                    הנתונים מעובדים מקומית בלבד.
+                </p>
+
+                <div class="amazon-import-actions">
+                    <a
+                        href="https://www.amazon.jobs/user/recommendations"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >פתיחת כל ההמלצות ב-Amazon</a>
+                </div>
+
+                <textarea
+                    id="amazonRecommendationsText"
+                    aria-label="המלצות Amazon שהועתקו"
+                    placeholder="הדביקו כאן את תוכן דף ההמלצות"
+                ></textarea>
+
+                <div class="amazon-import-actions">
+                    <button
+                        id="amazonImportButton"
+                        type="button"
+                    >ייבוא המלצות שהועתקו</button>
+
+                    <span
+                        id="amazonImportStatus"
+                        class="amazon-import-status"
+                        role="status"
+                        aria-live="polite"
+                    ></span>
+                </div>
+            </div>
+        </details>
+
+        <section class="filters">
+            <div class="search-filter">
+                <div class="search-control">
+                    <input
+                        id="searchInput"
+                        type="search"
+                        aria-label="חיפוש חופשי"
+                        placeholder="תפקיד, חברה, מיקום או תיאור משרה"
+                    >
+
+                    <button
+                        id="clearSearchButton"
+                        class="clear-search"
+                        type="button"
+                        aria-label="ניקוי החיפוש"
+                        hidden
+                    >
+                        נקה
+                    </button>
+                </div>
+            </div>
+
+            <select id="bucketFilter">
+                <option value="high_match,review">
+                    רלוונטיות בלבד
+                </option>
+
+                <option value="high_match">
+                    התאמה גבוהה
+                </option>
+
+                <option value="review">
+                    לבדיקה
+                </option>
+
+                <option value="rejected">
+                    נפסלו
+                </option>
+
+                <option value="all">
+                    כל המשרות
+                </option>
+            </select>
+
+            <details
+                id="sourceFilter"
+                class="source-filter"
+            >
+                <summary>
+                    <span id="sourceFilterSummary">
+                        כל המקורות
+                    </span>
+                </summary>
+
+                <div
+                    class="source-filter-menu"
+                    aria-label="בחירת מקורות"
+                >
+                    <button
+                        id="clearSourceFilter"
+                        class="source-filter-clear"
+                        type="button"
+                    >
+                        כל המקורות
+                    </button>
+
+                    <div
+                        id="sourceFilterOptions"
+                        class="source-filter-options"
+                    ></div>
+                </div>
+            </details>
+
+            <select id="locationFilter">
+                <option value="">
+                    כל המיקומים
+                </option>
+            </select>
+
+            <select id="technologyFilter">
+                <option value="">
+                    כל הטכנולוגיות
+                </option>
+            </select>
+
+            <select id="statusFilter">
+                <option value="all">
+                    כל הסימונים
+                </option>
+
+                <option value="none">
+                    ללא סימון
+                </option>
+
+                <option value="interested">
+                    מעניין
+                </option>
+
+                <option value="applied">
+                    נשלח
+                </option>
+
+                <option value="not_interested">
+                    לא רלוונטי
+                </option>
+            </select>
+
+            <select id="sortFilter">
+                <option value="match_score">
+                    מיון: ציון התאמה
+                </option>
+
+                <option value="newest">
+                    מיון: נוספו לאחרונה
+                </option>
+            </select>
+
+            <button id="refreshButton">
+                איסוף וסינון מחדש
+            </button>
+        </section>
+
+        <div class="automation-status-grid">
+            <section
+                class="automation-status-card"
+                aria-labelledby="manualRefreshHeading"
+            >
+                <strong id="manualRefreshHeading">
+                    רענון ידני
+                </strong>
+
+                <div
+                    id="refreshStatus"
+                    class="refresh-status"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+
+                <div
+                    id="refreshProgress"
+                    class="refresh-progress"
+                    hidden
+                >
+                    <div id="refreshStageText"></div>
+
+                    <div class="refresh-progress-row">
+                        <progress
+                            id="refreshProgressBar"
+                            max="1"
+                            aria-labelledby="
+                                refreshStageText
+                                refreshProgressCount
+                            "
+                        ></progress>
+
+                        <span
+                            id="refreshProgressCount"
+                            class="refresh-progress-count"
+                        ></span>
+                    </div>
+                </div>
+            </section>
+
+            <section
+                class="automation-status-card"
+                aria-labelledby="whatsappAutomationHeading"
+            >
+                <strong id="whatsappAutomationHeading">
+                    עדכוני WhatsApp אוטומטיים
+                </strong>
+
+                <div
+                    id="liveUpdateStatus"
+                    class="refresh-status"
+                    role="status"
+                    aria-live="polite"
+                >
+                    בודק את מצב האיסוף האוטומטי...
+                </div>
+            </section>
+        </div>
+
+        <div class="results-header">
+            <strong>תוצאות</strong>
+
+            <span
+                id="resultsCount"
+                class="results-count"
+            ></span>
+        </div>
+
+        <section
+            id="jobsContainer"
+            class="jobs"
+        >
+            <div class="loading">
+                טוען משרות...
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const jobsContainer =
+            document.getElementById("jobsContainer");
+
+        const resultsCount =
+            document.getElementById("resultsCount");
+
+        const collectionStatus =
+            document.getElementById("collectionStatus");
+
+        const amazonRecommendationsText =
+            document.getElementById(
+                "amazonRecommendationsText"
+            );
+        const amazonImportButton =
+            document.getElementById("amazonImportButton");
+        const amazonImportStatus =
+            document.getElementById("amazonImportStatus");
+
+        const preferencesButton =
+            document.getElementById("preferencesButton");
+        const preferencesDialog =
+            document.getElementById("preferencesDialog");
+        const preferencesForm =
+            document.getElementById("preferencesForm");
+        const preferencesList =
+            document.getElementById("preferencesList");
+        const preferencesSaveStatus =
+            document.getElementById(
+                "preferencesSaveStatus"
+            );
+        const savePreferencesButton =
+            document.getElementById(
+                "savePreferencesButton"
+            );
+        const closePreferencesButton =
+            document.getElementById(
+                "closePreferencesButton"
+            );
+
+        const searchInput =
+            document.getElementById("searchInput");
+
+        const clearSearchButton =
+            document.getElementById("clearSearchButton");
+
+        const bucketFilter =
+            document.getElementById("bucketFilter");
+
+        const sourceFilter =
+            document.getElementById("sourceFilter");
+        const sourceFilterSummary =
+            document.getElementById("sourceFilterSummary");
+        const sourceFilterOptions =
+            document.getElementById("sourceFilterOptions");
+        const clearSourceFilter =
+            document.getElementById("clearSourceFilter");
+
+        const locationFilter =
+            document.getElementById("locationFilter");
+
+        const technologyFilter =
+            document.getElementById("technologyFilter");
+
+        const statusFilter =
+            document.getElementById("statusFilter");
+
+        const sortFilter =
+            document.getElementById("sortFilter");
+
+        const refreshButton =
+            document.getElementById("refreshButton");
+
+        const refreshStatus =
+            document.getElementById("refreshStatus");
+        const refreshProgress =
+            document.getElementById("refreshProgress");
+        const refreshStageText =
+            document.getElementById("refreshStageText");
+        const refreshProgressBar =
+            document.getElementById("refreshProgressBar");
+        const refreshProgressCount =
+            document.getElementById("refreshProgressCount");
+
+        const liveUpdateStatus =
+            document.getElementById("liveUpdateStatus");
+
+        let searchTimer = null;
+        let refreshPollTimer = null;
+        let liveUpdateTimer = null;
+        let jobsRequestVersion = 0;
+        let lastJobsSignature = null;
+        let amazonClipboardHtml = null;
+        const LIVE_UPDATE_INTERVAL_MS = 10000;
+
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+
+        function safeExternalUrl(value) {
+            try {
+                const url = new URL(
+                    String(value ?? "")
+                );
+
+                if (
+                    url.protocol !== "http:"
+                    && url.protocol !== "https:"
+                ) {
+                    return null;
+                }
+
+                return url.href;
+
+            } catch {
+                return null;
+            }
+        }
+
+
+        function bucketLabel(bucket) {
+            const labels = {
+                high_match: "התאמה גבוהה",
+                review: "לבדיקה",
+                rejected: "נפסלה"
+            };
+
+            return labels[bucket] ?? bucket;
+        }
+
+
+        function sourceLabel(source) {
+            const labels = {
+                ashby: "Ashby",
+                greenhouse: "Greenhouse",
+                lever: "Lever",
+                smartrecruiters: "SmartRecruiters",
+                workable: "Workable",
+                amazon_email: "Amazon email",
+                amazon_manual: "Amazon clipboard",
+                linkedin_email: "LinkedIn email",
+                telegram: "Telegram",
+                whatsapp: "WhatsApp"
+            };
+
+            return labels[source] ?? source;
+        }
+
+
+        function conciseJobReasons(job) {
+            const components = Array.isArray(
+                job.score_components
+            )
+                ? job.score_components
+                : [];
+
+            if (components.length === 0) {
+                return job.reasons ?? [];
+            }
+
+            const byCriterion = new Map(
+                components.map(component => [
+                    component.criterion,
+                    component
+                ])
+            );
+            const reasons = [];
+            const addReason = reason => {
+                if (reason && !reasons.includes(reason)) {
+                    reasons.push(reason);
+                }
+            };
+            const matchesText = component => (
+                Array.isArray(component?.matches)
+                    ? component.matches
+                        .filter(Boolean)
+                        .join(", ")
+                    : ""
+            );
+            const seniority =
+                byCriterion.get("seniority");
+            const seniorityMatches =
+                matchesText(seniority);
+
+            if (seniority?.status === "excluded") {
+                addReason(
+                    "Seniority too high in title"
+                    + (
+                        seniorityMatches
+                            ? ": " + seniorityMatches
+                            : "."
+                    )
+                );
+            } else if (
+                seniority?.status === "student-only"
+            ) {
+                addReason(
+                    "Student or internship role."
+                );
+            } else if (
+                seniority?.status === "preferred"
+                && seniorityMatches
+            ) {
+                addReason(
+                    "Junior indicator in title: "
+                    + seniorityMatches
+                );
+            }
+
+            const education =
+                byCriterion.get("education");
+
+            if (
+                education?.status
+                === "active student required"
+            ) {
+                addReason(
+                    "Description requires an active student."
+                );
+            }
+
+            const experience =
+                byCriterion.get("experience");
+            const experienceMatches =
+                matchesText(experience);
+
+            if (experience?.status === "preferred") {
+                addReason(
+                    "Experience requirement fits"
+                    + (
+                        experienceMatches
+                            ? ": " + experienceMatches
+                            : "."
+                    )
+                );
+            } else if (
+                experience?.status
+                === "above preferred range"
+            ) {
+                addReason(
+                    "Experience is above the preferred range"
+                    + (
+                        experienceMatches
+                            ? ": " + experienceMatches
+                            : "."
+                    )
+                );
+            } else if (
+                experience?.status
+                === "above acceptable range"
+                || experience?.status === "excluded"
+            ) {
+                addReason(
+                    "Experience requirement too high"
+                    + (
+                        experienceMatches
+                            ? ": " + experienceMatches
+                            : "."
+                    )
+                );
+            } else if (
+                experience?.status === "junior signal"
+            ) {
+                addReason(
+                    "Junior signal found in description."
+                );
+            } else if (
+                experience?.status === "senior signal"
+            ) {
+                addReason(
+                    "Senior wording found in description; "
+                    + "manual review is needed."
+                );
+            }
+
+            const location =
+                byCriterion.get("location");
+            const locationMatches =
+                matchesText(location);
+
+            if (location?.status === "preferred") {
+                addReason(
+                    "Preferred location"
+                    + (
+                        locationMatches
+                            ? ": " + locationMatches
+                            : "."
+                    )
+                );
+            } else if (
+                location?.status === "acceptable"
+            ) {
+                addReason(
+                    "Location is acceptable"
+                    + (
+                        locationMatches
+                            ? ": " + locationMatches
+                            : "."
+                    )
+                );
+            } else if (
+                location?.status === "excluded"
+            ) {
+                addReason(
+                    "Location outside allowed area"
+                    + (
+                        locationMatches
+                            ? ": " + locationMatches
+                            : "."
+                    )
+                );
+            } else if (
+                location?.status === "unknown"
+            ) {
+                addReason(
+                    "Location could not be classified."
+                );
+            }
+
+            const role =
+                byCriterion.get("role_domain");
+            const roleMatches = matchesText(role);
+
+            if (
+                role?.status === "preferred"
+                && roleMatches
+            ) {
+                addReason(
+                    "Relevant title keywords: "
+                    + roleMatches
+                );
+            } else if (
+                role?.status
+                    === "outside preferred domain"
+                && roleMatches
+            ) {
+                addReason(
+                    "Less relevant title keywords: "
+                    + roleMatches
+                );
+            }
+
+            const technology =
+                byCriterion.get("technology");
+            const technologyMatches =
+                matchesText(technology);
+
+            if (
+                technology?.status === "preferred"
+                && technologyMatches
+            ) {
+                addReason(
+                    "Relevant technologies: "
+                    + technologyMatches
+                );
+            } else if (
+                technology?.status === "not preferred"
+                && technologyMatches
+            ) {
+                addReason(
+                    "Less relevant technologies: "
+                    + technologyMatches
+                );
+            }
+
+            return reasons;
+        }
+
+
+        function preferenceLabel(criterion) {
+            const labels = {
+                role_domain: "תפקיד ותחום מקצועי",
+                location: "מיקום",
+                technology: "טכנולוגיות",
+                experience: "דרישת ניסיון",
+                seniority: "דרג וותק",
+                education: "השכלה",
+                work_model: "אופן עבודה"
+            };
+
+            return labels[criterion] ?? criterion;
+        }
+
+
+        function preferenceDescription(criterion) {
+            const descriptions = {
+                role_domain:
+                    "בודק עד כמה שם התפקיד והתחום המקצועי מתאימים לכיוון הקריירה שבחרת.",
+                location:
+                    "משווה את מיקום המשרה לאזורים המועדפים, המקובלים, הניטרליים והלא מתאימים שבחרת.",
+                technology:
+                    "נותן עדיפות למשרות שבהן מופיעות הטכנולוגיות שמעניינות אותך.",
+                experience:
+                    "משווה את שנות הניסיון הנדרשות לטווח המועדף והמרבי שהגדרת.",
+                seniority:
+                    "בודק אם דרג המשרה מתאים לך ומונע מדרגים שהוגדרו כלא מתאימים לקבל ציון גבוה.",
+                education:
+                    "בודק דרישות השכלה, ובפרט אם המשרה מיועדת רק לסטודנטים פעילים.",
+                work_model:
+                    "משווה בין עבודה מרחוק, היברידית או מהמשרד לבין אופן העבודה המועדף עליך."
+            };
+
+            return descriptions[criterion] ?? "";
+        }
+
+
+        function policyLabel(policy) {
+            const labels = {
+                reject: "פסילה",
+                penalty: "הפחתת ציון",
+                neutral: "ללא השפעה"
+            };
+
+            return labels[policy] ?? policy;
+        }
+
+
+        function preferenceSelectionGroups(criterion) {
+            const summary =
+                criterion.selection_summary ?? {};
+
+            switch (criterion.id) {
+                case "role_domain":
+                    return [
+                        {
+                            title: "תפקידים ותחומים מועדפים",
+                            values: summary.preferred
+                        },
+                        {
+                            title: "תפקידים ותחומים לא מתאימים",
+                            values: summary.excluded
+                        }
+                    ];
+
+                case "location":
+                    return [
+                        {
+                            title: "אזורים מועדפים",
+                            values: summary.preferred,
+                            category: "preferred"
+                        },
+                        {
+                            title: "אזורים מקובלים",
+                            values: summary.acceptable,
+                            category: "acceptable"
+                        },
+                        {
+                            title: "אזורים ניטרליים",
+                            values: summary.neutral,
+                            category: "neutral"
+                        },
+                        {
+                            title: "מיקומים לא מתאימים",
+                            values: summary.excluded,
+                            category: "excluded"
+                        }
+                    ];
+
+                case "technology":
+                    return [
+                        {
+                            title: "טכנולוגיות מועדפות",
+                            values: summary.preferred
+                        }
+                    ];
+
+                case "experience":
+                    return [
+                        {
+                            title: "טווח מועדף",
+                            values: [
+                                (
+                                    "עד "
+                                    + summary
+                                        .preferred_maximum_years
+                                    + " שנות ניסיון"
+                                )
+                            ]
+                        },
+                        {
+                            title: "טווח מקובל",
+                            values: [
+                                (
+                                    "עד "
+                                    + summary
+                                        .acceptable_maximum_years
+                                    + " שנות ניסיון"
+                                )
+                            ]
+                        },
+                        {
+                            title: "מעל הטווח",
+                            values: [
+                                (
+                                    "החל מ-"
+                                    + summary
+                                        .excluded_minimum_years
+                                    + " שנים: "
+                                    + policyLabel(
+                                        summary.excluded_policy
+                                    )
+                                )
+                            ]
+                        }
+                    ];
+
+                case "seniority":
+                    return [
+                        {
+                            title: "דרגים מועדפים",
+                            values: summary.preferred
+                        },
+                        {
+                            title: "מילות סטודנט והתמחות",
+                            values: summary.student
+                        },
+                        {
+                            title: "דרגים לא מתאימים",
+                            values: summary.excluded
+                        },
+                        {
+                            title: "משרות לסטודנטים",
+                            values: [
+                                (
+                                    summary.student_roles_allowed
+                                        ? "מותרות"
+                                        : "לא מתאימות"
+                                )
+                            ]
+                        }
+                    ];
+
+                case "education":
+                    return [
+                        {
+                            title: "משרות לסטודנטים פעילים",
+                            values: [
+                                policyLabel(
+                                    summary.active_student_policy
+                                )
+                            ]
+                        }
+                    ];
+
+                case "work_model":
+                    return [
+                        {
+                            title: "אופן עבודה מועדף",
+                            values: summary.preferred
+                        },
+                        {
+                            title: "אופן עבודה מקובל",
+                            values: summary.acceptable
+                        },
+                        {
+                            title: "אופן עבודה לא מתאים",
+                            values: summary.excluded
+                        }
+                    ];
+
+                default:
+                    return [];
+            }
+        }
+
+
+        function locationPreferenceLabel(category) {
+            const labels = {
+                preferred: "מועדף",
+                acceptable: "מקובל",
+                neutral: "ניטרלי",
+                excluded: "לא מתאים",
+                other: "ללא סיווג"
+            };
+
+            return labels[category] ?? category;
+        }
+
+
+        function appendLocationPreferenceGroup(
+            container,
+            title,
+            values,
+            category
+        ) {
+            const group =
+                document.createElement("section");
+            const heading =
+                document.createElement("h3");
+            const cleanValues = Array.isArray(values)
+                ? values.filter(item => (
+                    item?.value !== null
+                    && item?.value !== undefined
+                    && String(item.value).trim() !== ""
+                ))
+                : [];
+
+            group.className =
+                "preference-selection-group";
+            heading.textContent = title;
+            group.appendChild(heading);
+
+            if (cleanValues.length === 0) {
+                const empty =
+                    document.createElement("p");
+
+                empty.className =
+                    "preference-empty-selection";
+                empty.textContent = "לא נבחרו ערכים.";
+                group.appendChild(empty);
+            } else {
+                const list =
+                    document.createElement("div");
+
+                list.className =
+                    "location-preference-list";
+
+                for (const item of cleanValues) {
+                    const row =
+                        document.createElement("label");
+                    const label =
+                        document.createElement("span");
+                    const select =
+                        document.createElement("select");
+
+                    row.className =
+                        "location-preference-item";
+                    row.dataset.locationValue =
+                        String(item.value);
+                    label.className =
+                        "location-preference-label";
+                    label.textContent = String(
+                        item.label ?? item.value
+                    );
+                    select.className =
+                        "location-preference-select";
+                    select.setAttribute(
+                        "aria-label",
+                        (
+                            "רמת העדפה עבור "
+                            + String(item.value)
+                        )
+                    );
+
+                    for (
+                        const level
+                        of [
+                            "preferred",
+                            "acceptable",
+                            "neutral",
+                            "excluded",
+                            "other"
+                        ]
+                    ) {
+                        const option =
+                            document.createElement(
+                                "option"
+                            );
+
+                        option.value = level;
+                        option.textContent =
+                            locationPreferenceLabel(
+                                level
+                            );
+                        option.selected =
+                            level === category;
+                        select.appendChild(option);
+                    }
+
+                    row.append(label, select);
+                    list.appendChild(row);
+                }
+
+                group.appendChild(list);
+            }
+
+            container.appendChild(group);
+        }
+
+
+        function appendSelectionGroup(
+            container,
+            title,
+            values
+        ) {
+            const group =
+                document.createElement("section");
+            const heading =
+                document.createElement("h3");
+            const cleanValues = Array.isArray(values)
+                ? values.filter(value => (
+                    value !== null
+                    && value !== undefined
+                    && String(value).trim() !== ""
+                ))
+                : [];
+
+            group.className =
+                "preference-selection-group";
+            heading.textContent = title;
+            group.appendChild(heading);
+
+            if (cleanValues.length === 0) {
+                const empty =
+                    document.createElement("p");
+
+                empty.className =
+                    "preference-empty-selection";
+                empty.textContent = "לא נבחרו ערכים.";
+                group.appendChild(empty);
+            } else {
+                const chips =
+                    document.createElement("div");
+
+                chips.className = "preference-chips";
+
+                for (const value of cleanValues) {
+                    const chip =
+                        document.createElement("span");
+
+                    chip.className = "preference-chip";
+                    chip.textContent = String(value);
+                    chips.appendChild(chip);
+                }
+
+                group.appendChild(chips);
+            }
+
+            container.appendChild(group);
+        }
+
+
+        function appendLocationCatalog(
+            container,
+            catalog
+        ) {
+            const otherLocations =
+                catalog?.groups?.other ?? [];
+            const values = otherLocations.map(item => ({
+                value: item.label,
+                label: (
+                    item.label
+                    + " · "
+                    + item.count
+                    + (
+                        item.count === 1
+                            ? " משרה"
+                            : " משרות"
+                    )
+                )
+            }));
+
+            appendLocationPreferenceGroup(
+                container,
+                "מיקומים נוספים שנמצאו במשרות",
+                values,
+                "other"
+            );
+
+            if (catalog?.truncated) {
+                const note =
+                    document.createElement("p");
+
+                note.className =
+                    "preference-catalog-note";
+                note.textContent = (
+                    "מוצגים "
+                    + catalog.shown
+                    + " מתוך "
+                    + catalog.total_distinct
+                    + " מיקומים ייחודיים."
+                );
+                container.appendChild(note);
+            }
+        }
+
+
+        function preferenceBoardGroups(
+            criterion,
+            locationCatalog
+        ) {
+            const summary =
+                criterion.selection_summary ?? {};
+            const stringItems = values => (
+                Array.isArray(values)
+                    ? values.map(value => ({
+                        value: String(value),
+                        label: String(value)
+                    }))
+                    : []
+            );
+
+            switch (criterion.id) {
+                case "role_domain":
+                    return [
+                        {
+                            category: "preferred",
+                            title: "מועדף",
+                            items: stringItems(
+                                summary.preferred
+                            )
+                        },
+                        {
+                            category: "neutral",
+                            title: "ניטרלי",
+                            items: stringItems(
+                                summary.neutral
+                            )
+                        },
+                        {
+                            category: "excluded",
+                            title: "לא מתאים",
+                            items: stringItems(
+                                summary.excluded
+                            )
+                        }
+                    ];
+
+                case "location": {
+                    const savedUnclassified =
+                        stringItems(
+                            summary.unclassified
+                        );
+                    const savedValues = new Set(
+                        savedUnclassified.map(
+                            item => (
+                                item.value
+                                    .trim()
+                                    .toLocaleLowerCase()
+                            )
+                        )
+                    );
+                    const groups = [
+                        {
+                            category: "preferred",
+                            title: "מועדף",
+                            items: stringItems(
+                                summary.preferred
+                            )
+                        },
+                        {
+                            category: "acceptable",
+                            title: "מקובל",
+                            items: stringItems(
+                                summary.acceptable
+                            )
+                        },
+                        {
+                            category: "neutral",
+                            title: "ניטרלי",
+                            items: stringItems(
+                                summary.neutral
+                            )
+                        },
+                        {
+                            category: "excluded",
+                            title: "לא מתאים",
+                            items: stringItems(
+                                summary.excluded
+                            )
+                        }
+                    ];
+                    const otherLocations =
+                        locationCatalog?.groups?.other ?? [];
+
+                    groups.push({
+                        category: "unclassified",
+                        title: "ללא סיווג",
+                        items: [
+                            ...savedUnclassified,
+                            ...otherLocations
+                                .filter(item => (
+                                    !savedValues.has(
+                                        String(item.label)
+                                            .trim()
+                                            .toLocaleLowerCase()
+                                    )
+                                ))
+                                .map(item => ({
+                                    value: String(item.label),
+                                    label: (
+                                        item.label
+                                        + " · "
+                                        + item.count
+                                        + (
+                                            item.count === 1
+                                                ? " משרה"
+                                                : " משרות"
+                                        )
+                                    )
+                                }))
+                        ]
+                    });
+                    return groups;
+                }
+
+                case "technology":
+                    return [
+                        {
+                            category: "preferred",
+                            title: "מועדף",
+                            items: stringItems(
+                                summary.preferred
+                            )
+                        },
+                        {
+                            category: "neutral",
+                            title: "ניטרלי",
+                            items: stringItems(
+                                summary.neutral
+                            )
+                        },
+                        {
+                            category: "excluded",
+                            title: "לא מתאים",
+                            items: stringItems(
+                                summary.excluded
+                            )
+                        }
+                    ];
+
+                case "seniority":
+                    return [
+                        {
+                            category: "preferred",
+                            title: "מועדף",
+                            items: stringItems(
+                                summary.preferred
+                            )
+                        },
+                        {
+                            category: "student",
+                            title: "סטודנט והתמחות",
+                            items: stringItems(
+                                summary.student
+                            )
+                        },
+                        {
+                            category: "excluded",
+                            title: "לא מתאים",
+                            items: stringItems(
+                                summary.excluded
+                            )
+                        }
+                    ];
+
+                case "work_model":
+                    return [
+                        {
+                            category: "preferred",
+                            title: "מועדף",
+                            items: stringItems(
+                                summary.preferred
+                            )
+                        },
+                        {
+                            category: "acceptable",
+                            title: "מקובל",
+                            items: stringItems(
+                                summary.acceptable
+                            )
+                        },
+                        {
+                            category: "excluded",
+                            title: "לא מתאים",
+                            items: stringItems(
+                                summary.excluded
+                            )
+                        }
+                    ];
+
+                default:
+                    return [];
+            }
+        }
+
+
+        function updatePreferenceBoardCounts(board) {
+            for (
+                const zone
+                of board.querySelectorAll(
+                    ".preference-drop-zone"
+                )
+            ) {
+                zone.querySelector(
+                    ".preference-drop-count"
+                ).textContent = String(
+                    zone.querySelectorAll(
+                        ".preference-drag-chip"
+                    ).length
+                );
+            }
+        }
+
+
+        function movePreferenceChip(chip, zone) {
+            zone.querySelector(
+                ".preference-drop-items"
+            ).appendChild(chip);
+            updatePreferenceBoardCounts(
+                zone.closest(".preference-board")
+            );
+        }
+
+
+        function appendPreferenceBoard(
+            container,
+            criterion,
+            groups
+        ) {
+            const note =
+                document.createElement("p");
+            const board =
+                document.createElement("div");
+
+            note.className = "preference-edit-note";
+            note.textContent = (
+                "אפשר לגרור כל פריט מתיבה לתיבה. "
+                + "עם המקלדת אפשר להתמקד בפריט "
+                + "ולהשתמש בחצים ימינה ושמאלה."
+            );
+            board.className = "preference-board";
+            board.dataset.criterion = criterion.id;
+
+            for (const group of groups) {
+                const zone =
+                    document.createElement("section");
+                const heading =
+                    document.createElement("h3");
+                const title =
+                    document.createElement("span");
+                const count =
+                    document.createElement("span");
+                const items =
+                    document.createElement("div");
+
+                zone.className =
+                    "preference-drop-zone";
+                zone.dataset.category = group.category;
+                zone.setAttribute(
+                    "aria-label",
+                    group.title
+                );
+                heading.className =
+                    "preference-drop-heading";
+                title.textContent = group.title;
+                count.className =
+                    "preference-drop-count";
+                items.className =
+                    "preference-drop-items";
+                heading.append(title, count);
+                zone.append(heading, items);
+
+                for (const item of group.items) {
+                    const chip =
+                        document.createElement("span");
+                    const handle =
+                        document.createElement("span");
+                    const label =
+                        document.createElement("span");
+
+                    chip.className =
+                        "preference-drag-chip";
+                    chip.draggable = true;
+                    chip.tabIndex = 0;
+                    chip.dataset.preferenceValue =
+                        item.value;
+                    chip.setAttribute(
+                        "role",
+                        "button"
+                    );
+                    chip.setAttribute(
+                        "aria-label",
+                        (
+                            item.label
+                            + "; "
+                            + group.title
+                        )
+                    );
+                    handle.className =
+                        "preference-drag-handle";
+                    handle.textContent = "⠿";
+                    handle.setAttribute(
+                        "aria-hidden",
+                        "true"
+                    );
+                    label.textContent = item.label;
+                    chip.append(handle, label);
+
+                    chip.addEventListener(
+                        "dragstart",
+                        event => {
+                            chip.classList.add(
+                                "dragging"
+                            );
+                            event.dataTransfer.effectAllowed =
+                                "move";
+                            event.dataTransfer.setData(
+                                "text/plain",
+                                item.value
+                            );
+                        }
+                    );
+                    chip.addEventListener(
+                        "dragend",
+                        () => {
+                            chip.classList.remove(
+                                "dragging"
+                            );
+
+                            for (
+                                const currentZone
+                                of board.querySelectorAll(
+                                    ".preference-drop-zone"
+                                )
+                            ) {
+                                currentZone.classList.remove(
+                                    "drag-over"
+                                );
+                            }
+                        }
+                    );
+                    chip.addEventListener(
+                        "keydown",
+                        event => {
+                            if (
+                                event.key !== "ArrowLeft"
+                                && event.key !== "ArrowRight"
+                            ) {
+                                return;
+                            }
+
+                            event.preventDefault();
+                            const zones = Array.from(
+                                board.querySelectorAll(
+                                    ".preference-drop-zone"
+                                )
+                            );
+                            const currentZone = chip.closest(
+                                ".preference-drop-zone"
+                            );
+                            const currentIndex =
+                                zones.indexOf(currentZone);
+                            const direction = (
+                                event.key === "ArrowRight"
+                                    ? -1
+                                    : 1
+                            );
+                            const nextIndex = (
+                                currentIndex
+                                + direction
+                                + zones.length
+                            ) % zones.length;
+
+                            movePreferenceChip(
+                                chip,
+                                zones[nextIndex]
+                            );
+                            chip.focus();
+                        }
+                    );
+                    items.appendChild(chip);
+                }
+
+                zone.addEventListener(
+                    "dragover",
+                    event => {
+                        event.preventDefault();
+                        event.dataTransfer.dropEffect =
+                            "move";
+                        zone.classList.add("drag-over");
+                    }
+                );
+                zone.addEventListener(
+                    "dragleave",
+                    event => {
+                        if (
+                            !zone.contains(
+                                event.relatedTarget
+                            )
+                        ) {
+                            zone.classList.remove(
+                                "drag-over"
+                            );
+                        }
+                    }
+                );
+                zone.addEventListener(
+                    "drop",
+                    event => {
+                        event.preventDefault();
+                        zone.classList.remove("drag-over");
+                        const chip = board.querySelector(
+                            ".preference-drag-chip.dragging"
+                        );
+
+                        if (chip) {
+                            movePreferenceChip(
+                                chip,
+                                zone
+                            );
+                        }
+                    }
+                );
+                board.appendChild(zone);
+            }
+
+            updatePreferenceBoardCounts(board);
+            container.append(note, board);
+        }
+
+
+        function appendPreferenceSelect(
+            container,
+            labelText,
+            field,
+            value,
+            options
+        ) {
+            const label =
+                document.createElement("label");
+            const text =
+                document.createElement("span");
+            const select =
+                document.createElement("select");
+
+            label.className = "preference-field";
+            text.textContent = labelText;
+            select.dataset.settingField = field;
+
+            for (const optionData of options) {
+                const option =
+                    document.createElement("option");
+
+                option.value = optionData.value;
+                option.textContent = optionData.label;
+                option.selected =
+                    optionData.value === value;
+                select.appendChild(option);
+            }
+
+            label.append(text, select);
+            container.appendChild(label);
+        }
+
+
+        function appendExperienceEditor(
+            container,
+            summary
+        ) {
+            const fields =
+                document.createElement("div");
+            const numberFields = [
+                {
+                    field: "preferred_maximum_years",
+                    label: "מקסימום מועדף"
+                },
+                {
+                    field: "acceptable_maximum_years",
+                    label: "מקסימום מקובל"
+                },
+                {
+                    field: "excluded_minimum_years",
+                    label: "מינימום לא מתאים"
+                }
+            ];
+
+            fields.className = "preference-field-grid";
+
+            for (const fieldData of numberFields) {
+                const label =
+                    document.createElement("label");
+                const text =
+                    document.createElement("span");
+                const input =
+                    document.createElement("input");
+
+                label.className = "preference-field";
+                text.textContent =
+                    fieldData.label + " (שנים)";
+                input.type = "number";
+                input.min = "0";
+                input.max = "50";
+                input.step = "1";
+                input.required = true;
+                input.dataset.settingField =
+                    fieldData.field;
+                input.value = summary[
+                    fieldData.field
+                ];
+                label.append(text, input);
+                fields.appendChild(label);
+            }
+
+            appendPreferenceSelect(
+                fields,
+                "כאשר הדרישה גבוהה מדי",
+                "excluded_policy",
+                summary.excluded_policy,
+                [
+                    {
+                        value: "reject",
+                        label: "פסילת המשרה"
+                    },
+                    {
+                        value: "penalty",
+                        label: "הפחתת ציון"
+                    }
+                ]
+            );
+            container.appendChild(fields);
+        }
+
+
+        function appendCriterionExtraControls(
+            container,
+            criterion
+        ) {
+            const summary =
+                criterion.selection_summary ?? {};
+            const fields =
+                document.createElement("div");
+
+            fields.className = "preference-field-grid";
+
+            if (
+                [
+                    "location",
+                    "seniority",
+                    "work_model"
+                ].includes(criterion.id)
+            ) {
+                appendPreferenceSelect(
+                    fields,
+                    "טיפול בפריט לא מתאים",
+                    "excluded_policy",
+                    summary.excluded_policy,
+                    [
+                        {
+                            value: "reject",
+                            label: "פסילת המשרה"
+                        },
+                        {
+                            value: "penalty",
+                            label: "הפחתת ציון"
+                        }
+                    ]
+                );
+            }
+
+            if (criterion.id === "seniority") {
+                const label =
+                    document.createElement("label");
+                const checkbox =
+                    document.createElement("input");
+                const text =
+                    document.createElement("span");
+
+                label.className =
+                    "preference-inline-setting";
+                checkbox.type = "checkbox";
+                checkbox.dataset.settingField =
+                    "student_roles_allowed";
+                checkbox.checked = Boolean(
+                    summary.student_roles_allowed
+                );
+                text.textContent =
+                    "לאפשר משרות סטודנט והתמחות";
+                label.append(checkbox, text);
+                fields.appendChild(label);
+            }
+
+            if (criterion.id === "education") {
+                appendPreferenceSelect(
+                    fields,
+                    "משרה הדורשת סטודנט פעיל",
+                    "active_student_policy",
+                    summary.active_student_policy,
+                    [
+                        {
+                            value: "reject",
+                            label: "פסילת המשרה"
+                        },
+                        {
+                            value: "penalty",
+                            label: "הפחתת ציון"
+                        },
+                        {
+                            value: "neutral",
+                            label: "ללא השפעה"
+                        }
+                    ]
+                );
+            }
+
+            if (fields.childElementCount > 0) {
+                container.appendChild(fields);
+            }
+        }
+
+
+        function renderPreferences(data) {
+            preferencesList.replaceChildren();
+
+            for (const criterion of data.criteria) {
+                const row =
+                    document.createElement("div");
+                const primaryRow =
+                    document.createElement("div");
+                const toggle =
+                    document.createElement("button");
+                const name =
+                    document.createElement("span");
+                const body =
+                    document.createElement("div");
+                const description =
+                    document.createElement("p");
+                const selectionGrid =
+                    document.createElement("div");
+                const weightControl =
+                    document.createElement("label");
+                const weightInput =
+                    document.createElement("input");
+                const weightOutput =
+                    document.createElement("output");
+                const requiredControl =
+                    document.createElement("label");
+                const requiredInput =
+                    document.createElement("input");
+                const requiredText =
+                    document.createElement("span");
+
+                row.className = "preference-row";
+                row.dataset.criterion = criterion.id;
+
+                primaryRow.className =
+                    "preference-primary-row";
+                toggle.className =
+                    "preference-toggle";
+                toggle.type = "button";
+                toggle.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+                name.className = "preference-name";
+                name.textContent =
+                    preferenceLabel(criterion.id);
+                toggle.appendChild(name);
+
+                body.className = "preference-body";
+                body.id = (
+                    "preferenceDetails-"
+                    + criterion.id
+                );
+                body.hidden = true;
+                toggle.setAttribute(
+                    "aria-controls",
+                    body.id
+                );
+                description.className =
+                    "preference-description";
+                description.id = (
+                    "preferenceDescription-"
+                    + criterion.id
+                );
+                description.textContent =
+                    preferenceDescription(
+                        criterion.id
+                    );
+                selectionGrid.className =
+                    "preference-selection-grid";
+
+                const boardGroups =
+                    preferenceBoardGroups(
+                        criterion,
+                        data.location_catalog
+                    );
+
+                if (boardGroups.length > 0) {
+                    appendPreferenceBoard(
+                        selectionGrid,
+                        criterion,
+                        boardGroups
+                    );
+                }
+
+                if (criterion.id === "experience") {
+                    appendExperienceEditor(
+                        selectionGrid,
+                        criterion.selection_summary ?? {}
+                    );
+                }
+
+                appendCriterionExtraControls(
+                    selectionGrid,
+                    criterion
+                );
+
+                if (
+                    criterion.id === "location"
+                    && data.location_catalog?.truncated
+                ) {
+                    const note =
+                        document.createElement("p");
+
+                    note.className =
+                        "preference-catalog-note";
+                    note.textContent = (
+                        "מוצגים "
+                        + data.location_catalog.shown
+                        + " מתוך "
+                        + data.location_catalog
+                            .total_distinct
+                        + " מיקומים ייחודיים."
+                    );
+                    selectionGrid.appendChild(note);
+                }
+
+                weightControl.className =
+                    "preference-weight";
+                weightInput.type = "range";
+                weightInput.id = (
+                    "preferenceWeight-"
+                    + criterion.id
+                );
+                weightInput.min = data.weight_min;
+                weightInput.max = data.weight_max;
+                weightInput.step = "1";
+                weightInput.value = criterion.weight;
+                weightInput.setAttribute(
+                    "aria-label",
+                    (
+                        "משקל "
+                        + preferenceLabel(criterion.id)
+                    )
+                );
+                weightInput.setAttribute(
+                    "aria-describedby",
+                    description.id
+                );
+                weightOutput.setAttribute(
+                    "for",
+                    weightInput.id
+                );
+                weightOutput.value = criterion.weight;
+                weightOutput.textContent = criterion.weight;
+                weightControl.append(
+                    weightInput,
+                    weightOutput
+                );
+
+                requiredControl.className =
+                    "preference-required";
+                requiredInput.type = "checkbox";
+                requiredInput.checked = Boolean(
+                    criterion.required_for_high_match
+                );
+                requiredInput.setAttribute(
+                    "aria-label",
+                    (
+                        "הכרחי להתאמה גבוהה: "
+                        + preferenceLabel(criterion.id)
+                    )
+                );
+                requiredText.textContent =
+                    "הכרחי להתאמה גבוהה";
+                requiredControl.append(
+                    requiredInput,
+                    requiredText
+                );
+
+                weightInput.addEventListener(
+                    "input",
+                    () => {
+                        weightOutput.value =
+                            weightInput.value;
+                        weightOutput.textContent =
+                            weightInput.value;
+                    }
+                );
+                toggle.addEventListener(
+                    "click",
+                    () => {
+                        const isExpanded =
+                            toggle.getAttribute(
+                                "aria-expanded"
+                            ) === "true";
+
+                        toggle.setAttribute(
+                            "aria-expanded",
+                            String(!isExpanded)
+                        );
+                        body.hidden = isExpanded;
+                        row.classList.toggle(
+                            "expanded",
+                            !isExpanded
+                        );
+                    }
+                );
+
+                primaryRow.append(
+                    toggle,
+                    weightControl,
+                    requiredControl
+                );
+                body.append(
+                    description,
+                    selectionGrid
+                );
+                row.append(
+                    primaryRow,
+                    body
+                );
+                preferencesList.appendChild(row);
+            }
+        }
+
+
+        async function openPreferences() {
+            preferencesSaveStatus.textContent =
+                "טוען העדפות...";
+            preferencesSaveStatus.classList.remove(
+                "error"
+            );
+            preferencesList.replaceChildren();
+            preferencesDialog.showModal();
+
+            try {
+                const response = await fetch(
+                    "/api/preferences"
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "לא ניתן לטעון את ההעדפות."
+                    );
+                }
+
+                renderPreferences(
+                    await response.json()
+                );
+                preferencesSaveStatus.textContent = "";
+
+            } catch (error) {
+                preferencesSaveStatus.classList.add(
+                    "error"
+                );
+                preferencesSaveStatus.textContent =
+                    error.message;
+            }
+        }
+
+
+        async function savePreferences(event) {
+            event.preventDefault();
+            const criteria = Array.from(
+                preferencesList.querySelectorAll(
+                    ".preference-row"
+                )
+            ).map(row => {
+                const criterion = {
+                    id: row.dataset.criterion,
+                    weight: Number(
+                        row.querySelector(
+                            'input[type="range"]'
+                        ).value
+                    ),
+                    required_for_high_match:
+                        row.querySelector(
+                            ".preference-required "
+                            + 'input[type="checkbox"]'
+                        ).checked
+                };
+                const selectionSummary = {};
+                const board = row.querySelector(
+                    ".preference-board"
+                );
+
+                if (board) {
+                    for (
+                        const zone
+                        of board.querySelectorAll(
+                            ".preference-drop-zone"
+                        )
+                    ) {
+                        const category = zone.dataset.category;
+
+                        selectionSummary[category] =
+                            Array.from(
+                                zone.querySelectorAll(
+                                    ".preference-drag-chip"
+                                )
+                            ).map(
+                                chip => (
+                                    chip.dataset
+                                        .preferenceValue
+                                )
+                            );
+                    }
+                }
+
+                for (
+                    const field
+                    of row.querySelectorAll(
+                        "[data-setting-field]"
+                    )
+                ) {
+                    const value = (
+                        field.type === "checkbox"
+                            ? field.checked
+                            : field.type === "number"
+                            ? Number(field.value)
+                            : field.value
+                    );
+
+                    selectionSummary[
+                        field.dataset.settingField
+                    ] = value;
+                }
+
+                criterion.selection_summary =
+                    selectionSummary;
+                return criterion;
+            });
+
+            savePreferencesButton.disabled = true;
+            closePreferencesButton.disabled = true;
+            preferencesSaveStatus.classList.remove(
+                "error"
+            );
+            preferencesSaveStatus.textContent =
+                "שומר ומחשב מחדש את ציוני המשרות...";
+
+            try {
+                const response = await fetch(
+                    "/api/preferences",
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({criteria})
+                    }
+                );
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail
+                        ?? "שמירת ההעדפות נכשלה."
+                    );
+                }
+
+                renderPreferences(data);
+                preferencesSaveStatus.textContent =
+                    (
+                        "ההעדפות נשמרו ו-"
+                        + data.evaluated_jobs
+                        + " משרות חושבו מחדש."
+                    );
+                await loadOptions();
+                await loadJobs();
+
+            } catch (error) {
+                preferencesSaveStatus.classList.add(
+                    "error"
+                );
+                preferencesSaveStatus.textContent =
+                    error.message;
+
+            } finally {
+                savePreferencesButton.disabled = false;
+                closePreferencesButton.disabled = false;
+            }
+        }
+
+
+        function selectedSources() {
+            return Array.from(
+                sourceFilterOptions.querySelectorAll(
+                    'input[type="checkbox"]:checked'
+                )
+            ).map(input => input.value);
+        }
+
+
+        function updateSourceFilterSummary() {
+            const sources = selectedSources();
+            const labels = sources.map(sourceLabel);
+            const summary = (
+                labels.length === 0
+                    ? "כל המקורות"
+                    : labels.length <= 2
+                        ? labels.join(", ")
+                        : `${labels.length} מקורות`
+            );
+
+            sourceFilterSummary.textContent = summary;
+            sourceFilterSummary.title = labels.join(", ");
+            clearSourceFilter.disabled =
+                sources.length === 0;
+        }
+
+
+        function appendSelectedSources(parameters) {
+            for (const source of selectedSources()) {
+                parameters.append("source", source);
+            }
+        }
+
+
+        function seniorityLabel(value) {
+            const labels = {
+                junior: "ג׳וניור",
+                "entry-level": "כניסה לתחום",
+                "junior-to-mid": "ג׳וניור עד מיד",
+                "mid-level": "מיד",
+                senior: "סניור",
+                "senior-or-lead": "סניור / הובלה",
+                "not-specified": "לא צוין",
+                "student-or-intern": "סטודנט / התמחות"
+            };
+
+            return labels[value] ?? value ?? "לא צוין";
+        }
+
+
+        function formatExperience(job) {
+            const minimum = job.experience_min;
+            const maximum = job.experience_max;
+
+            if (minimum === null || minimum === undefined) {
+                return "ניסיון לא זוהה";
+            }
+
+            if (maximum === null || maximum === undefined) {
+                return `${minimum}+ שנות ניסיון`;
+            }
+
+            if (minimum === maximum) {
+                return `${minimum} שנות ניסיון`;
+            }
+
+            return `${minimum}-${maximum} שנות ניסיון`;
+        }
+
+
+        function updateSummary(summary) {
+            document.getElementById(
+                "highMatchCount"
+            ).textContent = summary.high_match ?? 0;
+
+            document.getElementById(
+                "reviewCount"
+            ).textContent = summary.review ?? 0;
+
+            document.getElementById(
+                "interestedCount"
+            ).textContent = summary.interested ?? 0;
+
+            document.getElementById(
+                "appliedCount"
+            ).textContent = summary.applied ?? 0;
+        }
+
+
+        function renderCollectionSources(sources) {
+            if (!sources?.length) {
+                collectionStatus.innerHTML = `
+                    <div class="collection-source">
+                        אין מקורות ATS מוגדרים.
+                    </div>
+                `;
+                return;
+            }
+
+            const statusLabels = {
+                not_run: "טרם נאסף",
+                running: "האיסוף פועל",
+                success: "האיסוף האחרון הצליח",
+                error: "האיסוף האחרון נכשל"
+            };
+
+            collectionStatus.innerHTML = sources
+                .map(source => {
+                    const isError =
+                        source.status === "error";
+                    const lastCollection = (
+                        source.last_collection_at
+                        ?? "אין עדיין"
+                    );
+                    const counts = (
+                        source.status === "success"
+                            ? `
+                                ${source.postings_relevant}
+                                רלוונטיות מתוך
+                                ${source.postings_seen}
+                            `
+                            : ""
+                    );
+                    const errorText = (
+                        isError && source.error
+                            ? `<div>
+                                ${escapeHtml(source.error)}
+                            </div>`
+                            : ""
+                    );
+
+                    return `
+                        <div
+                            class="
+                                collection-source
+                                ${isError ? "error" : ""}
+                            "
+                        >
+                            <strong>
+                                ${escapeHtml(source.company)}
+                                ·
+                                ${escapeHtml(
+                                    sourceLabel(source.adapter)
+                                )}
+                            </strong>
+
+                            <div>
+                                ${escapeHtml(
+                                    statusLabels[source.status]
+                                    ?? source.status
+                                )}
+                                ${counts}
+                            </div>
+
+                            <div>
+                                איסוף אחרון:
+                                ${escapeHtml(lastCollection)}
+                            </div>
+
+                            ${errorText}
+                        </div>
+                    `;
+                })
+                .join("");
+        }
+
+
+        function renderJob(job) {
+            const safeSourceUrl = safeExternalUrl(
+                job.source_message_url
+            );
+
+            const safeJobUrl = safeExternalUrl(
+                job.job_url
+            );
+
+            const technologies = (
+                job.technologies ?? []
+            ).map(
+                technology => `
+                    <span class="technology">
+                        ${escapeHtml(technology)}
+                    </span>
+                `
+            ).join("");
+
+            const sources = (
+                job.sources ?? []
+            ).map(
+                source => `
+                    <span class="tag">
+                        מקור:
+                        ${escapeHtml(sourceLabel(source))}
+                    </span>
+                `
+            ).join("");
+
+            const reasonItems = conciseJobReasons(
+                job
+            ).map(
+                reason => `
+                    <li>${escapeHtml(reason)}</li>
+                `
+            ).join("");
+            const reasons = reasonItems
+                ? `
+                    <ul class="reasons">
+                        ${reasonItems}
+                    </ul>
+                `
+                : "";
+
+            const description = job.description_preview
+                ? `
+                    <details>
+                        <summary>
+                            הצגת תקציר תיאור המשרה
+                        </summary>
+
+                        <div
+                            class="description"
+                            dir="ltr"
+                        >
+                            ${escapeHtml(job.description_preview)}
+                        </div>
+                    </details>
+                `
+                : "";
+
+            const sourceLink = safeSourceUrl
+                ? `
+                    <a
+                        href="${escapeHtml(safeSourceUrl)}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        מקור בטלגרם
+                    </a>
+                `
+                : "";
+
+            const jobLink = safeJobUrl
+                ? `
+                    <a
+                        class="primary"
+                        href="${escapeHtml(safeJobUrl)}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        פתיחת המשרה
+                    </a>
+                `
+                : "";
+
+            return `
+                <article
+                    class="
+                        job-card
+                        ${escapeHtml(job.user_status)}
+                    "
+                    data-job-id="${job.id}"
+                >
+                    <div class="job-top">
+                        <div>
+                            <h2 class="job-title">
+                                ${escapeHtml(job.title)}
+                            </h2>
+
+                            <div class="company">
+                                ${escapeHtml(job.company)}
+                            </div>
+                        </div>
+
+                        <div
+                            class="
+                                score
+                                ${escapeHtml(job.match_bucket)}
+                            "
+                        >
+                            ${escapeHtml(
+                                bucketLabel(job.match_bucket)
+                            )}
+                            <br>
+                            ${job.match_score}
+                        </div>
+                    </div>
+
+                    <div class="metadata">
+                        ${sources}
+
+                        <span class="tag">
+                            📍 ${escapeHtml(
+                                job.location ?? "לא צוין"
+                            )}
+                        </span>
+
+                        <span class="tag">
+                            ${escapeHtml(
+                                formatExperience(job)
+                            )}
+                        </span>
+
+                        <span class="tag">
+                            ${escapeHtml(
+                                seniorityLabel(
+                                    job.seniority_label
+                                )
+                            )}
+                        </span>
+
+                        <span class="tag">
+                            פורסם:
+                            ${escapeHtml(
+                                job.posted_on ?? "לא ידוע"
+                            )}
+                        </span>
+
+                        <span class="tag">
+                            מקורות:
+                            ${job.source_count}
+                        </span>
+                    </div>
+
+                    <div class="technologies">
+                        ${technologies}
+                    </div>
+
+                    ${reasons}
+
+                    ${description}
+
+                    <div class="actions">
+                        ${jobLink}
+                        ${sourceLink}
+
+                        <button
+                            class="${
+                                job.user_status === "interested"
+                                    ? "active"
+                                    : ""
+                            }"
+                            onclick="
+                                setFeedback(
+                                    ${job.id},
+                                    'interested'
+                                )
+                            "
+                        >
+                            ⭐ מעניין
+                        </button>
+
+                        <button
+                            class="${
+                                job.user_status === "applied"
+                                    ? "active"
+                                    : ""
+                            }"
+                            onclick="
+                                setFeedback(
+                                    ${job.id},
+                                    'applied'
+                                )
+                            "
+                        >
+                            ✅ נשלח
+                        </button>
+
+                        <button
+                            class="${
+                                job.user_status === "not_interested"
+                                    ? "active"
+                                    : ""
+                            }"
+                            onclick="
+                                setFeedback(
+                                    ${job.id},
+                                    'not_interested'
+                                )
+                            "
+                        >
+                            ✖ לא רלוונטי
+                        </button>
+
+                        ${
+                            job.user_status !== "none"
+                                ? `
+                                    <button
+                                        onclick="
+                                            setFeedback(
+                                                ${job.id},
+                                                'none'
+                                            )
+                                        "
+                                    >
+                                        ביטול סימון
+                                    </button>
+                                `
+                                : ""
+                        }
+                    </div>
+                </article>
+            `;
+        }
+
+
+        async function loadOptions() {
+            const response = await fetch(
+                "/api/options"
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load filter options."
+                );
+            }
+
+            const data = await response.json();
+            const selectedSourceValues =
+                new Set(selectedSources());
+            const selectedLocation = locationFilter.value;
+            const selectedTechnology =
+                technologyFilter.value;
+
+            sourceFilterOptions.replaceChildren();
+            locationFilter.length = 1;
+            technologyFilter.length = 1;
+
+            renderCollectionSources(
+                data.collection_sources
+            );
+
+            for (const source of data.sources) {
+                const option =
+                    document.createElement("label");
+                const checkbox =
+                    document.createElement("input");
+                const text =
+                    document.createElement("span");
+
+                option.className = "source-filter-option";
+                checkbox.type = "checkbox";
+                checkbox.value = source;
+                checkbox.checked =
+                    selectedSourceValues.has(source);
+                text.textContent = sourceLabel(source);
+
+                option.append(checkbox, text);
+                sourceFilterOptions.appendChild(option);
+            }
+
+            for (const location of data.locations) {
+                const option =
+                    document.createElement("option");
+
+                option.value = location;
+                option.textContent = location;
+
+                locationFilter.appendChild(option);
+            }
+
+            for (
+                const technology
+                of data.technologies
+            ) {
+                const option =
+                    document.createElement("option");
+
+                option.value = technology;
+                option.textContent = technology;
+
+                technologyFilter.appendChild(option);
+            }
+
+            if (
+                Array.from(locationFilter.options)
+                    .some(option =>
+                        option.value === selectedLocation
+                    )
+            ) {
+                locationFilter.value = selectedLocation;
+            }
+
+            if (
+                Array.from(technologyFilter.options)
+                    .some(option =>
+                        option.value === selectedTechnology
+                    )
+            ) {
+                technologyFilter.value =
+                    selectedTechnology;
+            }
+
+            updateSourceFilterSummary();
+            updateSummary(data.summary);
+        }
+
+
+        async function loadJobs(
+            showLoading = true
+        ) {
+            const requestVersion =
+                ++jobsRequestVersion;
+
+            if (showLoading) {
+                jobsContainer.innerHTML = `
+                    <div class="loading">
+                        טוען משרות...
+                    </div>
+                `;
+            }
+
+            const parameters =
+                new URLSearchParams();
+
+            parameters.set(
+                "bucket",
+                bucketFilter.value
+            );
+
+            parameters.set(
+                "q",
+                searchInput.value.trim()
+            );
+
+            appendSelectedSources(parameters);
+
+            parameters.set(
+                "location",
+                locationFilter.value
+            );
+
+            parameters.set(
+                "technology",
+                technologyFilter.value
+            );
+
+            parameters.set(
+                "user_status",
+                statusFilter.value
+            );
+
+            parameters.set(
+                "sort",
+                sortFilter.value
+            );
+
+            parameters.set(
+                "limit",
+                "300"
+            );
+
+            try {
+                const response = await fetch(
+                    `/api/jobs?${parameters.toString()}`
+                );
+
+                if (!response.ok) {
+                    const errorData =
+                        await response.json();
+
+                    throw new Error(
+                        errorData.detail
+                        ?? "Failed to load jobs."
+                    );
+                }
+
+                const data = await response.json();
+
+                if (
+                    requestVersion
+                    !== jobsRequestVersion
+                ) {
+                    return;
+                }
+
+                updateSummary(data.summary);
+
+                resultsCount.textContent =
+                    `${data.total} משרות`;
+
+                const jobsSignature =
+                    JSON.stringify(data.items);
+
+                if (
+                    jobsSignature
+                    === lastJobsSignature
+                    && !showLoading
+                ) {
+                    return;
+                }
+
+                lastJobsSignature = jobsSignature;
+
+                if (!data.items.length) {
+                    jobsContainer.innerHTML = `
+                        <div class="empty">
+                            לא נמצאו משרות המתאימות לסינון.
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                jobsContainer.innerHTML =
+                    data.items.map(
+                        renderJob
+                    ).join("");
+
+            } catch (error) {
+                if (
+                    requestVersion
+                    !== jobsRequestVersion
+                ) {
+                    return;
+                }
+
+                if (showLoading) {
+                    jobsContainer.innerHTML = `
+                        <div class="error">
+                            ${escapeHtml(error.message)}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+
+        function renderLiveUpdateState(data) {
+            const hasError =
+                data.status === "error"
+                || Boolean(data.evaluation_error);
+
+            liveUpdateStatus.classList.toggle(
+                "error",
+                hasError
+            );
+
+            if (!data.enabled) {
+                liveUpdateStatus.textContent =
+                    "עדכוני WhatsApp אוטומטיים כבויים.";
+                return;
+            }
+
+            if (data.status === "running") {
+                liveUpdateStatus.textContent =
+                    "עדכוני WhatsApp אוטומטיים פעילים. "
+                    + "רשימת המשרות מתעדכנת כל "
+                    + data.ui_poll_interval_seconds
+                    + " שניות.";
+                return;
+            }
+
+            if (data.status === "starting") {
+                liveUpdateStatus.textContent =
+                    "מפעיל איסוף WhatsApp אוטומטי...";
+                return;
+            }
+
+            liveUpdateStatus.textContent =
+                data.evaluation_error
+                ?? data.error
+                ?? "איסוף WhatsApp האוטומטי אינו פעיל.";
+        }
+
+
+        async function loadLiveUpdateStatus() {
+            const response = await fetch(
+                "/api/whatsapp-automation"
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to read WhatsApp automation status."
+                );
+            }
+
+            renderLiveUpdateState(
+                await response.json()
+            );
+        }
+
+
+        async function refreshLiveData() {
+            if (document.hidden) {
+                return;
+            }
+
+            await Promise.allSettled([
+                loadJobs(false),
+                loadLiveUpdateStatus()
+            ]);
+        }
+
+
+        function scheduleLiveUpdates() {
+            clearTimeout(liveUpdateTimer);
+
+            liveUpdateTimer = setTimeout(
+                async () => {
+                    await refreshLiveData();
+                    scheduleLiveUpdates();
+                },
+                LIVE_UPDATE_INTERVAL_MS
+            );
+        }
+
+
+        async function setFeedback(
+            jobId,
+            status
+        ) {
+            const response = await fetch(
+                `/api/jobs/${jobId}/feedback`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        status: status
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                const data = await response.json();
+
+                alert(
+                    data.detail
+                    ?? "שמירת הסימון נכשלה."
+                );
+
+                return;
+            }
+
+            await loadJobs();
+        }
+
+
+        function renderRefreshState(data) {
+            const isRunning =
+                data.status === "running";
+            const isCancelling =
+                data.status === "cancelling";
+            const isStarting =
+                data.status === "starting";
+
+            refreshButton.disabled =
+                isCancelling || isStarting;
+            refreshButton.dataset.action =
+                isRunning ? "cancel" : "start";
+            refreshButton.classList.toggle(
+                "cancel-action",
+                isRunning || isCancelling
+            );
+
+            refreshStatus.classList.toggle(
+                "error",
+                data.status === "error"
+            );
+
+            if (isStarting) {
+                refreshButton.textContent = "מתחיל...";
+                refreshStatus.textContent =
+                    "מכין רענון. איסוף המקורות הציבוריים "
+                    + "ו-Telegram ייקבע בשרת לפי מסנן "
+                    + "המקור וסוג ההפעלה.";
+                renderRefreshProgress(data);
+                return;
+            }
+
+            if (isCancelling) {
+                refreshButton.textContent = "מבטל...";
+                refreshStatus.textContent =
+                    "מבטל את הפעולה וממתין לסיום בטוח.";
+                renderRefreshProgress(data);
+                return;
+            }
+
+            if (isRunning) {
+                refreshButton.textContent = "בטל פעולה";
+                refreshStatus.textContent =
+                    refreshRunningText(data);
+                renderRefreshProgress(data);
+                return;
+            }
+
+            refreshProgress.hidden = true;
+            refreshButton.textContent =
+                "איסוף וסינון מחדש";
+
+            if (data.status === "error") {
+                const failedStage =
+                    refreshStageLabels[data.stage_key];
+                refreshStatus.textContent =
+                    failedStage
+                        ? (
+                            "הרענון נעצר במהלך: "
+                            + failedStage
+                            + "."
+                        )
+                        : "הרענון נעצר לפני שהושלם.";
+                return;
+            }
+
+            if (data.status === "cancelled") {
+                refreshStatus.textContent =
+                    "הרענון הידני בוטל. נתונים שכבר "
+                    + "נשמרו נשארו במסד הנתונים.";
+                return;
+            }
+
+            const publicAutomaticText =
+                data.automatic_public_refresh_enabled
+                    ? (
+                        "איסוף מקורות ציבוריים אוטומטי כל "
+                        + data.automatic_public_refresh_minutes
+                        + " דקות."
+                    )
+                    : "איסוף המקורות הציבוריים האוטומטי כבוי.";
+            const telegramAutomaticText =
+                data.automatic_refresh_enabled
+                    ? (
+                        "רענון Telegram אוטומטי כל "
+                        + data.automatic_refresh_minutes
+                        + " דקות."
+                    )
+                    : "רענון Telegram האוטומטי כבוי.";
+            const automaticText =
+                publicAutomaticText
+                + " "
+                + telegramAutomaticText;
+
+            if (data.status === "success") {
+                const completionText =
+                    data.trigger === "scheduled_public"
+                        ? (
+                            "איסוף המקורות הציבוריים האחרון "
+                            + "הסתיים בהצלחה."
+                        )
+                        : (
+                            data.trigger === "scheduled"
+                                ? (
+                                    "הרענון האוטומטי האחרון "
+                                    + "הסתיים בהצלחה."
+                                )
+                                : (
+                                    "הרענון הידני האחרון "
+                                    + "הסתיים בהצלחה."
+                                )
+                        );
+                refreshStatus.textContent =
+                    completionText
+                    + " "
+                    + refreshSourceText(data)
+                    + " "
+                    + telegramRefreshOutcomeText(data)
+                    + " "
+                    + automaticText;
+                return;
+            }
+
+            refreshStatus.textContent = automaticText;
+        }
+
+
+        function refreshRunningText(data) {
+            const telegramText =
+                telegramRefreshOutcomeText(data)
+                || (
+                    data.telegram_collection_included
+                        ? "איסוף Telegram כלול ברענון הידני."
+                        : (
+                            "איסוף Telegram אינו כלול לפי "
+                            + "מסנן המקור."
+                        )
+                );
+            const publicText =
+                data.public_collection_included
+                    ? "איסוף המקורות הציבוריים כלול."
+                    : "איסוף המקורות הציבוריים אינו כלול.";
+
+            return (
+                refreshSourceText(data)
+                + " "
+                + publicText
+                + " "
+                + telegramText
+                + " איסוף WhatsApp האוטומטי מוצג "
+                + "בנפרד."
+            );
+        }
+
+
+        function telegramRefreshOutcomeText(data) {
+            if (
+                data.telegram_collection_outcome
+                === "cooldown"
+            ) {
+                const seconds = Number(
+                    data.telegram_cooldown_seconds_remaining
+                    ?? 0
+                );
+                const minutes = Math.max(
+                    1,
+                    Math.ceil(seconds / 60)
+                );
+
+                return (
+                    "איסוף Telegram דולג בגלל מרווח "
+                    + `הבטיחות; נותרו כ-${minutes} דקות.`
+                );
+            }
+
+            if (
+                data.telegram_collection_outcome
+                === "performed"
+            ) {
+                if (data.telegram_safe_limit_reached) {
+                    return (
+                        "איסוף Telegram בוצע עד מגבלת "
+                        + "הבטיחות; ניתן להמשיך בעוד 5 דקות."
+                    );
+                }
+
+                return "איסוף Telegram בוצע.";
+            }
+
+            return "";
+        }
+
+
+        function refreshSourceText(data) {
+            const sourceValue = (
+                data.source_filter ?? "all"
+            ).trim().toLowerCase();
+            const sources = sourceValue === "all"
+                ? []
+                : sourceValue.split(",").filter(Boolean);
+            const label = sources.length === 0
+                ? "כל המקורות"
+                : sources.map(sourceLabel).join(", ");
+
+            return "מסנן המקור בעת ההפעלה: " + label + ".";
+        }
+
+
+        const refreshStageLabels = {
+            starting: "הכנת הרענון",
+            public_source_collection:
+                "איסוף מקורות מעסיקים ציבוריים",
+            telegram_collection:
+                "איסוף מקורות מטלגרם",
+            job_page_enrichment:
+                "העשרת פרטי משרות",
+            description_analysis:
+                "ניתוח תיאורי משרות",
+            relevance_filtering:
+                "חישוב התאמה מחדש",
+            complete: "הרענון הושלם"
+        };
+
+
+        function renderRefreshProgress(data) {
+            refreshProgress.hidden = false;
+
+            const stageLabel =
+                refreshStageLabels[data.stage_key]
+                ?? "עיבוד מקומי";
+            const hasStageCount =
+                Number.isInteger(data.stage_index)
+                && Number.isInteger(data.stage_count)
+                && data.stage_index > 0
+                && data.stage_count > 0;
+
+            refreshStageText.textContent =
+                hasStageCount
+                    ? (
+                        "שלב "
+                        + data.stage_index
+                        + " מתוך "
+                        + data.stage_count
+                        + ": "
+                        + stageLabel
+                    )
+                    : stageLabel;
+
+            const hasKnownTotal =
+                data.progress_mode === "determinate"
+                && Number.isInteger(
+                    data.progress_completed
+                )
+                && Number.isInteger(data.progress_total)
+                && data.progress_total >= 0;
+
+            if (!hasKnownTotal) {
+                refreshProgressBar.max = 1;
+                refreshProgressBar.removeAttribute(
+                    "value"
+                );
+                refreshProgressCount.textContent = "";
+                return;
+            }
+
+            const completed = Math.min(
+                data.progress_completed,
+                data.progress_total
+            );
+            refreshProgressBar.max = Math.max(
+                data.progress_total,
+                1
+            );
+            refreshProgressBar.value =
+                data.progress_total === 0
+                    ? 1
+                    : completed;
+
+            if (
+                data.progress_unit === "messages"
+                || data.progress_unit === "jobs"
+            ) {
+                refreshProgressCount.textContent =
+                    completed
+                    + "/"
+                    + data.progress_total;
+                return;
+            }
+
+            if (data.progress_unit === "sources") {
+                refreshProgressCount.textContent =
+                    completed
+                    + " מתוך "
+                    + data.progress_total
+                    + " מקורות";
+                return;
+            }
+
+            refreshProgressCount.textContent =
+                completed
+                + " מתוך "
+                + data.progress_total;
+        }
+
+
+        async function pollRefresh(
+            reloadWhenComplete = false
+        ) {
+            clearTimeout(refreshPollTimer);
+
+            try {
+                const response = await fetch(
+                    "/api/refresh"
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Failed to read refresh status."
+                    );
+                }
+
+                const data = await response.json();
+                renderRefreshState(data);
+
+                if (
+                    data.status === "running"
+                    || data.status === "cancelling"
+                ) {
+                    refreshPollTimer = setTimeout(
+                        () => pollRefresh(true),
+                        2000
+                    );
+                    return;
+                }
+
+                if (reloadWhenComplete) {
+                    await loadOptions();
+                    await loadJobs();
+                }
+
+            } catch (error) {
+                if (reloadWhenComplete) {
+                    refreshButton.disabled = true;
+                    refreshButton.textContent = "מרענן...";
+                    refreshStatus.classList.add("error");
+                    refreshStatus.textContent =
+                        "מצב הרענון המקומי אינו זמין כרגע; "
+                        + "מנסה שוב.";
+                    refreshPollTimer = setTimeout(
+                        () => pollRefresh(true),
+                        2000
+                    );
+                    return;
+                }
+
+                refreshButton.disabled = false;
+                refreshStatus.classList.add("error");
+                refreshStatus.textContent =
+                    "לא ניתן לקרוא את מצב הרענון המקומי.";
+            }
+        }
+
+
+        async function requestRefresh() {
+            renderRefreshState({
+                status: "starting",
+                stage_key: "starting",
+                stage_index: 0,
+                stage_count: null,
+                progress_mode: "indeterminate",
+                progress_completed: null,
+                progress_total: null,
+                progress_unit: null
+            });
+
+            try {
+                const parameters =
+                    new URLSearchParams();
+                appendSelectedSources(parameters);
+                const response = await fetch(
+                    (
+                        "/api/refresh?"
+                        + parameters.toString()
+                    ),
+                    {
+                        method: "POST"
+                    }
+                );
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail
+                        ?? "Failed to start refresh."
+                    );
+                }
+
+                renderRefreshState(data);
+                await pollRefresh(true);
+
+            } catch (error) {
+                refreshButton.disabled = false;
+                refreshButton.textContent =
+                    "איסוף וסינון מחדש";
+                refreshProgress.hidden = true;
+                refreshStatus.classList.add("error");
+                refreshStatus.textContent =
+                    "לא ניתן היה להתחיל את הרענון.";
+            }
+        }
+
+
+        async function requestRefreshCancellation() {
+            refreshButton.disabled = true;
+            refreshButton.textContent = "מבטל...";
+            refreshStatus.classList.remove("error");
+            refreshStatus.textContent =
+                "מבטל את הפעולה וממתין לסיום בטוח.";
+
+            try {
+                const response = await fetch(
+                    "/api/refresh",
+                    {
+                        method: "DELETE"
+                    }
+                );
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail
+                        ?? "Failed to cancel refresh."
+                    );
+                }
+
+                renderRefreshState(data);
+                await pollRefresh(true);
+
+            } catch (error) {
+                refreshStatus.classList.add("error");
+                refreshStatus.textContent =
+                    "לא ניתן היה לבטל את הפעולה; "
+                    + "בודק את מצבה.";
+                await pollRefresh(true);
+            }
+        }
+
+
+        async function importAmazonRecommendations() {
+            const text = amazonRecommendationsText.value;
+
+            if (!text.trim() && !amazonClipboardHtml) {
+                amazonImportStatus.classList.add("error");
+                amazonImportStatus.textContent =
+                    "יש להדביק תחילה את דף ההמלצות.";
+                return;
+            }
+
+            amazonImportButton.disabled = true;
+            amazonImportStatus.classList.remove("error");
+            amazonImportStatus.textContent = "מייבא מקומית...";
+
+            try {
+                const response = await fetch(
+                    "/api/import/amazon-recommendations",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            text,
+                            html: amazonClipboardHtml
+                        })
+                    }
+                );
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ?? "Amazon import failed."
+                    );
+                }
+
+                amazonRecommendationsText.value = "";
+                amazonClipboardHtml = null;
+                amazonImportStatus.textContent =
+                    `יובאו ${data.jobs_parsed} המלצות; `
+                    + `${data.new_jobs} משרות חדשות.`;
+                await loadOptions();
+                await loadJobs();
+
+            } catch (error) {
+                amazonImportStatus.classList.add("error");
+                amazonImportStatus.textContent =
+                    "לא ניתן היה לייבא את ההמלצות שהועתקו.";
+
+            } finally {
+                amazonImportButton.disabled = false;
+            }
+        }
+
+
+        function handleRefreshButton() {
+            if (
+                refreshButton.dataset.action === "cancel"
+            ) {
+                const shouldCancel = window.confirm(
+                    "לבטל את פעולת האיסוף והסינון? "
+                    + "נתונים שכבר נשמרו יישארו במסד "
+                    + "הנתונים."
+                );
+
+                if (!shouldCancel) {
+                    return;
+                }
+
+                void requestRefreshCancellation();
+                return;
+            }
+
+            void requestRefresh();
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            () => {
+                clearTimeout(searchTimer);
+                clearSearchButton.hidden =
+                    searchInput.value.length === 0;
+
+                searchTimer = setTimeout(
+                    loadJobs,
+                    350
+                );
+            }
+        );
+
+        preferencesButton.addEventListener(
+            "click",
+            () => {
+                void openPreferences();
+            }
+        );
+
+        closePreferencesButton.addEventListener(
+            "click",
+            () => {
+                preferencesDialog.close();
+            }
+        );
+
+        preferencesForm.addEventListener(
+            "submit",
+            event => {
+                void savePreferences(event);
+            }
+        );
+
+        bucketFilter.addEventListener(
+            "change",
+            loadJobs
+        );
+
+        sourceFilterOptions.addEventListener(
+            "change",
+            () => {
+                updateSourceFilterSummary();
+                void loadJobs();
+            }
+        );
+
+        clearSourceFilter.addEventListener(
+            "click",
+            () => {
+                for (
+                    const checkbox
+                    of sourceFilterOptions.querySelectorAll(
+                        'input[type="checkbox"]'
+                    )
+                ) {
+                    checkbox.checked = false;
+                }
+
+                sourceFilter.open = false;
+                updateSourceFilterSummary();
+                void loadJobs();
+            }
+        );
+
+        locationFilter.addEventListener(
+            "change",
+            loadJobs
+        );
+
+        technologyFilter.addEventListener(
+            "change",
+            loadJobs
+        );
+
+        statusFilter.addEventListener(
+            "change",
+            loadJobs
+        );
+
+        sortFilter.addEventListener(
+            "change",
+            loadJobs
+        );
+
+        refreshButton.addEventListener(
+            "click",
+            handleRefreshButton
+        );
+
+        amazonRecommendationsText.addEventListener(
+            "paste",
+            event => {
+                amazonClipboardHtml =
+                    event.clipboardData?.getData("text/html")
+                    || null;
+            }
+        );
+
+        amazonRecommendationsText.addEventListener(
+            "input",
+            event => {
+                if (event.inputType !== "insertFromPaste") {
+                    amazonClipboardHtml = null;
+                }
+            }
+        );
+
+        amazonImportButton.addEventListener(
+            "click",
+            () => {
+                void importAmazonRecommendations();
+            }
+        );
+
+        document.addEventListener(
+            "visibilitychange",
+            () => {
+                if (!document.hidden) {
+                    void refreshLiveData();
+                }
+            }
+        );
+
+        clearSearchButton.addEventListener(
+            "click",
+            () => {
+                clearTimeout(searchTimer);
+                searchInput.value = "";
+                clearSearchButton.hidden = true;
+                searchInput.focus();
+                void loadJobs();
+            }
+        );
+
+
+        async function start() {
+            try {
+                await loadOptions();
+                await loadJobs();
+                await pollRefresh();
+                await loadLiveUpdateStatus();
+                scheduleLiveUpdates();
+
+            } catch (error) {
+                jobsContainer.innerHTML = `
+                    <div class="error">
+                        ${escapeHtml(error.message)}
+                    </div>
+                `;
+            }
+        }
+
+
+        start();
+    </script>
+</body>
+</html>
